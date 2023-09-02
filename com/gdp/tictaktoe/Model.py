@@ -117,7 +117,7 @@ class Grid:
     def update_cell(self, x, y, cell):
         self.__validate_coords__( x, y)
         self.grid[(x, y)] = cell
-        print ("DDDONE")
+
 
 
     def fetch_cell(self, x, y) -> Cell:

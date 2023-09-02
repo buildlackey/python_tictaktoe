@@ -34,10 +34,10 @@ class UI:
 
     def announce_winner(self, grid):
         if grid.get_winner:
-            print(f"Game has been won by {grid.winner.name}. Congratulations!")
+            print(f"Game has been won by player who wisely chose '{grid.winner}'. Congratulations!\n")
         else:
-            print(f"Game resulted in a draw")
-        self.display_game_grid(self.grid)
+            print(f"Game resulted in a draw\n")
+        self.display_game_grid(grid)
 
     def get_restricted_input(self, prompt, valid_responses):
         while True:
@@ -73,7 +73,7 @@ class UI:
         def y_n_validator(string):
             return (str(string).upper() == 'Y' or str(string).upper() == 'N')
 
-        return self.get_user_input(prompt)
+        return self.get_user_input(prompt, y_n_validator)
 
 
 
@@ -98,6 +98,19 @@ class UI:
         print(f"\n{self.grid_view.render_as_string(grid)}")
 
     def update_grid_with_player_move(self, grid: Model.Grid, player: Model.Player):
+        """
+        Prompts a player to enter the coordinates of their next move, and updates 'grid' to
+        player's chosen letter ('X' or 'O').  Detects if this move is a winning move by
+        examining all columns, rows (and possibly diagonals in the case of a corner cell) to
+        check if any one contains only one distinct letter for all cells in the examined sequence.
+
+        Args:
+            grid:  the grid to update
+            player: the player making the move, who may be declared winner if this is a winning move
+
+        Returns:
+
+        """
         def parse_input(input_str):
             # Define a regular expression pattern to match two integers separated by non-numeric characters
             pattern = r'[^0-9]*([0-9]+)[^0-9]+([0-9]+)[^0-9]*'
@@ -115,11 +128,32 @@ class UI:
         def get_coords(string_input):
             return parse_input(string_input) is not None
 
-        msg = f"For next move, enter x,y coordinates of unoccupied cell (> 0 and < {grid.max_index})"
+
+        def is_winning_move(cell):
+            def is_cell_owned_by_curr_player(x_y_coords):
+                cell = grid.fetch_cell(x_y_coords[0], x_y_coords[1])
+                print(f"fetched from coords {x_y_coords}: {cell}")
+                return cell.symbol == player.symbol
+
+            def all_cells_owned_by_curr_player(cell_coordinates_sequence):
+                result =  all(is_cell_owned_by_curr_player(cell) for cell in cell_coordinates_sequence)
+                print(f"processing intersection: {cell_coordinates_sequence} yields: {result}")
+                return result
+
+            intersections = cell.get_adjoining_cells()  # rows, columns, and maybe diagonals that intersect cell
+            print(f"intersections: {intersections}")
+            any_intersection_owned = any(all_cells_owned_by_curr_player(cell_coord_seq) for cell_coord_seq in intersections)
+            print(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
+            return any_intersection_owned
+
+        msg = f"\nYour move, {player.name},  Enter x,y coordinates of unoccupied cell (> 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
         print(f"coords: {coords}")
-        grid.update_cell(coords[0], coords[1], Model.Cell(player.symbol, coords[0], coords[1], grid.max_index))
+        cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
+        grid.update_cell(coords[0], coords[1], cell)
+        if (is_winning_move(cell)):
+            grid.winner = cell.symbol
 
 
 

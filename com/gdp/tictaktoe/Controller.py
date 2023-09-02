@@ -42,7 +42,7 @@ class GameSessionController:
 
                 if not self.grid.moves_left():
                     self.ui.announce_winner(self.grid)
-                    if (self.ui.get_users_yes_no_response("Play again?") == 'Y'):
+                    if (self.ui.get_users_yes_no_response("Play again? (y/n)") == 'N'):
                         sys.exit(0)
 
 
