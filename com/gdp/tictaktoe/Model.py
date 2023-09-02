@@ -16,7 +16,7 @@ class Cell:
         self.grid_size = grid_size
 
     def __str__(self):
-        return f"Cell ({self.x},{self.y}): {self.symbol}"
+        return f"{self.symbol}"
 
     """
     Given a horizontal or vertical index position, return all the other indices in the row or column

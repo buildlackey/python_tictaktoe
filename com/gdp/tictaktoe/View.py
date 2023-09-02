@@ -21,8 +21,8 @@ class GridView:
         for y in range(grid.num_rows):
             row_values = []
             for x in range(grid.num_columns):
-                value = grid.fetch_cell(x, y).symbol
-                row_values.append(str(value).rjust(cell_width))
+                cell = grid.fetch_cell(x, y)
+                row_values.append(str(cell).rjust(cell_width))
             aligned_strings.append(" ".join(row_values))
         return "\n\n".join(aligned_strings)
 

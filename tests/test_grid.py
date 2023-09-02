@@ -6,7 +6,7 @@ from com.gdp.tictaktoe import View
 
 def test_grid_with_simple_cell_creation_factory():
     # Define a constant object factory that returns 1
-    def sum_factory(x,y):
+    def sum_factory(x, y, dummy):
         return x+y
 
     # Create a 3x3 grid with the constant object factory
@@ -21,7 +21,7 @@ def test_grid_with_simple_cell_creation_factory():
 
 
 def test_out_of_bounds_cell_reference():
-    def constant_factory(x,y):
+    def constant_factory(x, y, dummy):
         return 1
 
     with pytest.raises(ValueError) as e:
@@ -30,12 +30,12 @@ def test_out_of_bounds_cell_reference():
     assert "Coordinates are out of bounds: (3,4)" in str(e.value)
 
 def test_grid_view():
-    def times_factory(x,y):
+    def times_factory(x,y, dummy):
         return x*y*3            # x 3 to get a mix of cell display lenghts to better test alignment
 
     # Create a 3x3 grid with the constant object factory
     grid = Model.Grid(3, times_factory)
     string_representation = View.GridView().render_as_string(grid)
-    expected = " 0  0  0\n 0  3  6\n 0  6 12"
+    expected = " 0  0  0\n\n 0  3  6\n\n 0  6 12"
     assert string_representation == expected
 
