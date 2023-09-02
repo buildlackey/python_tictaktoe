@@ -2,7 +2,7 @@ class Player:
     def __init__(self, name, goes_first, symbol):
         self.name = name
         self.goes_first = goes_first
-        self.symbol = symbol
+        self.symbol = str(symbol).lower()
 
     def display(self):
         return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"
@@ -58,13 +58,12 @@ class Cell:
             print(f"Cell {self} identified as corner cell")
             adjoining_cells.append(self.__get_adjacent_cells_in_diagonal())
 
-
         return adjoining_cells
 
 
 
-def cell_factory(x,y):
-    return Cell('_', x, y)
+def cell_factory(x, y, max_index):
+    return Cell('_', x, y, max_index)
 
 class Grid:
 
@@ -88,26 +87,45 @@ class Grid:
 
     def __init__(self, max_index, object_factory=cell_factory):
         self.num_rows = max_index
-        self.num_columns = max_index
+        self.num_columns = max_index            # TODO - num_rows/cols not needed
         self.max_index = max_index
         self.object_factory = object_factory
-        self.grid = {(x, y): self.object_factory(x,y) for y in range(max_index) for x in range(max_index)}
+        self.grid = {(x, y): self.object_factory(x,y,self.max_index) for y in range(max_index) for x in range(max_index)}
+        self.winner = None
+
+
+    def get_winner(self) -> Player:
+        return self.winner
+
 
     def __validate_coords__(self, x, y):
         if not (0 <= x < self.max_index) or not (0 <= y < self.max_index):
             raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
 
 
+    def moves_left(self):
+        if (self.winner != None):
+            return False                # we have a winner, not accepting any more moves
+        remaining = False
+        for x in range(self.max_index):
+            for y in range(self.max_index):
+                cell = self.fetch_cell(x, y)
+                if cell.symbol != '_':
+                    remaining = True
+        return remaining
+
     def update_cell(self, x, y, cell):
         self.__validate_coords__( x, y)
         self.grid[(x, y)] = cell
+        print ("DDDONE")
 
 
-    def fetch_cell(self, x, y):
+    def fetch_cell(self, x, y) -> Cell:
         self.__validate_coords__( x, y)
         return self.grid.get((x, y), None)
 
     def clear(self):
+        self.winner = None
         for x in range(self.max_index):
             for y in range(self.max_index):
                 self.update_cell(x, y, Cell('_', x, y, self.max_index))
