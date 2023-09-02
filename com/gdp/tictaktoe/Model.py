@@ -1,4 +1,3 @@
-import random
 class Player:
     def __init__(self, name, goes_first, symbol):
         self.name = name
@@ -94,9 +93,22 @@ class Grid:
         self.object_factory = object_factory
         self.grid = {(x, y): self.object_factory(x,y) for y in range(max_index) for x in range(max_index)}
 
-    def fetch(self, x, y):
+    def __validate_coords__(self, x, y):
         if not (0 <= x < self.max_index) or not (0 <= y < self.max_index):
             raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
+
+
+    def update_cell(self, x, y, cell):
+        self.__validate_coords__( x, y)
+        self.grid[(x, y)] = cell
+
+
+    def fetch_cell(self, x, y):
+        self.__validate_coords__( x, y)
         return self.grid.get((x, y), None)
 
+    def clear(self):
+        for x in range(self.max_index):
+            for y in range(self.max_index):
+                self.update_cell(x, y, Cell('_', x, y, self.max_index))
 
