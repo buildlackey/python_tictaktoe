@@ -1,7 +1,6 @@
 
 import pytest
-from com.gdp.tictaktoe import Model
-from com.gdp.tictaktoe import View
+from tictaktoe import Model, View
 
 
 def test_grid_with_simple_cell_creation_factory():

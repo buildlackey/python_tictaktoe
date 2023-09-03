@@ -7,7 +7,7 @@ class Player:
         self.goes_first = goes_first
         self.symbol = str(symbol).lower()
 
-    def display(self):
+    def __str__(self):
         return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"
 
 

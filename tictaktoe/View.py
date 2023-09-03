@@ -1,7 +1,7 @@
 import re
 import logging
 
-from com.gdp.tictaktoe import Model
+from tictaktoe import Model
 
 """
 Renders the state of the game board as a printable string
@@ -80,7 +80,7 @@ class UI:
         player_name = self.get_nonnull_input("Please input player name: ")
         goes_first = self.get_restricted_input("Do you want to go first? (Y/N): ", ["Y", "N"])
         symbol = self.get_restricted_input("Please choose letter representing your moves ('X' or 'O'): ", ["X", "O"])
-        return Model.Player(player_name, goes_first, symbol)
+        return Model.Player(player_name, goes_first.upper() == 'Y', symbol)
 
     def game_grid_from_user_input(self):
         def check_bounds(value):
@@ -145,7 +145,7 @@ class UI:
             logging.debug(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
             return any_intersection_owned
 
-        msg = f"\nYour move, {player.name},  Enter x,y coordinates of fre cell (each coord > 0 and < {grid.max_index}): "
+        msg = f"\nYour move, {player.name},  Enter x,y coordinates of free cell (each coord > 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
         logging.debug(f"coords: {coords}")

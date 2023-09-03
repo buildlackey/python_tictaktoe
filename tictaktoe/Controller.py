@@ -1,10 +1,7 @@
 import logging
+import sys
 
-from com.gdp.tictaktoe import Model
-from com.gdp.tictaktoe import View
-
-
-
+from tictaktoe import Model, View
 
 """
 Assists controller in determining which player is next to move. We key off the answer of our
@@ -18,10 +15,15 @@ class NextPlayerToMove():
             self.players = [player1, player2]
         else:
             self.players = [player2, player1]
+
+    def __str__(self):
+        return f"player1: {self.players[0]}. player2: {self.players[1]}. count: {self.moveCount}"
+
+
     def get(self):
         index_of_next_player = self.moveCount % 2
         nextPlayer = self.players[index_of_next_player]
-        logging.debug(f"players: {self.players}. count: {self.moveCount}. index: {index_of_next_player}: {nextPlayer}")
+        logging.debug(f"nextTracker: {self}. index: {index_of_next_player}: {nextPlayer}")
         self.moveCount += 1
         return nextPlayer
 
@@ -58,12 +60,14 @@ class GameSessionController:
 
                 if not self.grid.moves_left():
                     self.ui.announce_winner(self.grid)
-                    if (self.ui.get_users_yes_no_response("Play again? (y/n)") == 'N'):
+                    if (self.ui.get_users_yes_no_response("\nPlay again? (y/n)") == 'N'):
                         return
 
 
 
 if __name__ == "__main__":
+    sys.path.append("/Users/chrisbedford/python/python_tictaktoe")
+
     GameSessionController().start()
     logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
 

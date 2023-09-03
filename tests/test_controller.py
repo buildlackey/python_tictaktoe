@@ -1,10 +1,4 @@
-
-import pytest
-import logging
-
-from com.gdp.tictaktoe import Controller
-from com.gdp.tictaktoe import View
-
+from tictaktoe import View, Controller
 
 
 def test_main_program(monkeypatch):

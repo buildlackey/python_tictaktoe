@@ -2,7 +2,7 @@
 import pytest
 import logging
 
-from com.gdp.tictaktoe import Model
+from tictaktoe import Model
 
 
 @pytest.fixture
