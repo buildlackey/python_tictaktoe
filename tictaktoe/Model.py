@@ -1,18 +1,23 @@
 import logging
 
 
+"""
+Represents a human or AIbot player.   The constructor accepts a factory 
+for generating this players next move. This enables us to allow a human 
+to choose the move, or delegate this task to an AI bot
+"""
 class Player:
-    def __init__(self, name, goes_first, symbol, gen_move_factory_func):
+    def __init__(self, name, goes_first, symbol, move_factory_func):
         self.name = name
         self.goes_first = goes_first
         self.symbol = str(symbol).lower()
-        self.gen_move_factory_func = gen_move_factory_func
+        self.gen_move_factory_func = move_factory_func
 
     def __str__(self):
         return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"
 
-    def move(self):
-        self.gen_move_factory_func(self)
+    def move(self, grid):
+        self.gen_move_factory_func(self, grid)
 
 
 class Cell:
@@ -114,12 +119,14 @@ class Grid:
     """
     def moves_left(self):
         if (self.winner != None):
+            logging.debug("Already have a winner")
             return False                # we have a winner, not accepting any more moves
         remaining = False
         for x in range(self.max_index):
             for y in range(self.max_index):
                 cell = self.fetch_cell(x, y)
                 if cell.symbol != '_':
+                    logging.debug(f"cell at ({x},{y}) is {cell.symbol}")
                     remaining = True
         return remaining
 

@@ -35,8 +35,8 @@ external player has the option of continuing for another round of play.
 """
 class GameSessionController:
 
-    def __init_player_state(self, ui: View.UI, grid: Model.Grid, human_mode):
-        def next_move_factory(player: Model.Player):                # default factory for getting next move
+    def __init_player_state(self, ui: View.UI,  human_mode):
+        def next_move_factory(player: Model.Player, grid: Model.Grid):                # default factory for getting next move
             ui.update_grid_with_player_move(grid, player)
 
         self.opponent = self.ui.player_from_user_input(next_move_factory)
@@ -45,13 +45,13 @@ class GameSessionController:
         else:
             my_player_symbol = 'X'
         self.my_player = Model.Player("SomeCheapAI", not self.opponent.goes_first, my_player_symbol, next_move_factory)
-        self.next_to_move = NextPlayerToMove(self.my_player, self.opponent)
+        self.whose_turn = NextPlayerToMove(self.my_player, self.opponent)
 
     def __init__(self, human_mode=False):
         self.ui = View.UI()
         self.grid = self.ui.game_grid_from_user_input()
         self.grid_dimension = self.grid.max_index
-        self.__init_player_state(self.ui, self.grid, human_mode)
+        self.__init_player_state(self.ui, human_mode)
 
 
     def get_grid(self):
@@ -67,8 +67,8 @@ class GameSessionController:
 
             while self.grid.winner == None :
                 self.ui.display_game_grid(self.grid)
-                player = self.next_to_move.get()
-                self.ui.update_grid_with_player_move(self.grid, player)
+                player = self.whose_turn.get()
+                player.move(self.grid)
 
                 if not self.grid.moves_left():
                     self.ui.announce_winner(self.grid)
@@ -78,7 +78,7 @@ class GameSessionController:
 
 
 if __name__ == "__main__":
-    GameSessionController(True).start()
     logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
+    GameSessionController(True).start()
 
 
