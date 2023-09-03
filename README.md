@@ -11,15 +11,15 @@ play against a primitive AI Bot that uses brute force search to determine its mo
 ## Running
 
 
-You can run the program from the top level project folder as shown below: 
+You can run the program from the top level project folder as shown below. 
 By specifying optional arguments you can run with  verbose logging 
-(using the '-v' / --verbose flag), and/or with -h/--human mode which 
-turns off the AIBot's automated move discovery, instead allowing the program
-launcher to input the AIBot's moves.  (Both of these can be useful for 
+(using the '-v' / --verbose flag), and/or with -m/--manual mode which 
+turns off the AIBot's automated move discovery, instead allowing you 
+to input the AIBot's moves.  (Both of these can be useful for 
 testing/debugging).
 
 
-    python Driver.py [-v] [-h] 
+    python Driver.py [-v] [-m] 
 
 
 The program will prompt you for your name, desired game symbol, and other preferences.

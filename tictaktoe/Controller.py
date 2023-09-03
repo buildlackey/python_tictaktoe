@@ -78,9 +78,7 @@ class GameSessionController:
 
 
 if __name__ == "__main__":
-    sys.path.append("/Users/chrisbedford/python/python_tictaktoe")
-
-    GameSessionController().start()
+    GameSessionController(True).start()
     logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
 
 

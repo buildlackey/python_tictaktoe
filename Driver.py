@@ -18,11 +18,11 @@ def setup_logging(verbose=False):
 def main():
     parser = argparse.ArgumentParser(description="Simple tic tak toe program using brute force search logic")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
-    parser.add_argument("-h", "--verbose", action="store_true", help="Elect human control over AIBot's moves ")
+    parser.add_argument("-m", "--manual", action="store_true", help="Elect manual control over AIBot's moves ")
     args = parser.parse_args()
     setup_logging(verbose=args.verbose)
 
-    GameSessionController().start(args.human)
+    GameSessionController(args.manual).start()
 
 
 if __name__ == "__main__":
