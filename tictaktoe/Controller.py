@@ -37,6 +37,7 @@ class GameSessionController:
     def __init__(self):
         self.ui = View.UI()
         self.grid = self.ui.game_grid_from_user_input()
+        self.grid_dimension = self.grid.max_index
         self.opponent = self.ui.player_from_user_input()
         if self.opponent.symbol == 'X':
             my_player_symbol = 'O'
@@ -48,10 +49,13 @@ class GameSessionController:
     def get_grid(self):
         return self.grid
 
+    def clear_grid(self):
+        self.grid = Model.Grid(int(self.grid_dimension))
+
 
     def start(self):
         while True:
-            self.grid.clear()
+            self.clear_grid()
 
             while self.grid.winner == None :
                 self.ui.display_game_grid(self.grid)
