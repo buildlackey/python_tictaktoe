@@ -1,7 +1,9 @@
-import sys
+import logging
 
 from com.gdp.tictaktoe import Model
 from com.gdp.tictaktoe import View
+
+
 
 
 """
@@ -17,7 +19,9 @@ class NextPlayerToMove():
         else:
             self.players = [player2, player1]
     def get(self):
-        nextPlayer = self.players[self.moveCount % 2]
+        index_of_next_player = self.moveCount % 2
+        nextPlayer = self.players[index_of_next_player]
+        logging.debug(f"players: {self.players}. count: {self.moveCount}. index: {index_of_next_player}: {nextPlayer}")
         self.moveCount += 1
         return nextPlayer
 
@@ -61,5 +65,6 @@ class GameSessionController:
 
 if __name__ == "__main__":
     GameSessionController().start()
+    logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
 
 

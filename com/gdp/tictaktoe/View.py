@@ -48,25 +48,6 @@ class UI:
             print(f"\nGame resulted in a draw\n")
         self.display_game_grid(grid)
 
-    def get_restricted_input(self, prompt, valid_responses):
-        while True:
-            response = input(prompt).upper()
-            if response in valid_responses:
-                return response
-            else:
-                print(f"Invalid choice. Please choose one of: {str(valid_responses)}")
-
-    def get_nonnull_input(self, prompt):
-        while True:
-            response = input(prompt).upper()
-            if len(response) > 0:
-                break
-            else:
-                print(prompt)
-
-        return response
-
-
     def get_user_input(self, prompt, input_validator):
         while True:
             response = input(prompt).upper()
@@ -77,6 +58,15 @@ class UI:
 
         return response
 
+    def get_restricted_input(self, prompt, valid_responses):
+        def validator(string):
+            return string in valid_responses
+        return self.get_user_input(prompt, validator)
+
+    def get_nonnull_input(self, prompt):
+        def validator(string):
+            return len(string) >  0
+        return self.get_user_input(prompt, validator)
 
     def get_users_yes_no_response(self, prompt):
         def y_n_validator(string):
@@ -155,7 +145,7 @@ class UI:
             logging.debug(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
             return any_intersection_owned
 
-        msg = f"\nYour move, {player.name},  Enter x,y coordinates of unoccupied cell (> 0 and < {grid.max_index}): "
+        msg = f"\nYour move, {player.name},  Enter x,y coordinates of fre cell (each coord > 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
         logging.debug(f"coords: {coords}")
