@@ -36,7 +36,7 @@ external player has the option of continuing for another round of play.
 class GameSessionController:
 
     def __init_player_state(self, ui: View.UI,  human_mode):
-        def next_move_factory(player: Model.Player, grid: Model.Grid):                # default factory for getting next move
+        def next_move_factory(player: Model.Player, grid: Model.Grid): # default factory for getting next move
             ui.update_grid_with_player_move(grid, player)
 
         self.opponent = self.ui.player_from_user_input(next_move_factory)

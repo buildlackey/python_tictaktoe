@@ -135,7 +135,6 @@ class Grid:
         self.grid[(x, y)] = cell
 
 
-
     def fetch_cell(self, x, y) -> Cell:
         self.__validate_coords__( x, y)
         return self.grid.get((x, y), None)
@@ -146,3 +145,19 @@ class Grid:
             for y in range(self.max_index):
                 self.update_cell(x, y, Cell('_', x, y, self.max_index))
 
+    def is_winning_move(self, cell, player_making_this_move):
+        def is_cell_owned_by_curr_player(x_y_coords):
+            cell = self.fetch_cell(x_y_coords[0], x_y_coords[1])
+            logging.debug(f"fetched from coords {x_y_coords}: {cell}")
+            return cell.symbol == player_making_this_move.symbol
+
+        def all_cells_owned_by_curr_player(cell_coordinates_sequence):
+            result =  all(is_cell_owned_by_curr_player(cell) for cell in cell_coordinates_sequence)
+            logging.debug(f"processing intersection: {cell_coordinates_sequence} yields: {result}")
+            return result
+
+        intersections = cell.get_adjoining_cells()  # rows, columns, and maybe diagonals that intersect cell
+        logging.debug(f"intersections: {intersections}")
+        any_intersection_owned = any(all_cells_owned_by_curr_player(cell_coord_seq) for cell_coord_seq in intersections)
+        logging.debug(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
+        return any_intersection_owned

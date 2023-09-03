@@ -107,7 +107,8 @@ class UI:
 
         Args:
             grid:  the grid to update
-            player: the player making the move, who may be declared winner if this is a winning move
+            player: the player making the move.  If this is a winning move, said player may be declared winner
+                    (by updating state in the grid that tracks if someone has already won)
 
         Returns:
 
@@ -123,29 +124,11 @@ class UI:
                 if (x >= 0 and x < grid.max_index and y >= 0 and y < grid.max_index):
                     if grid.fetch_cell(x, y).symbol == '_':
                         return [x, y]
-
             return None
 
         def get_coords(string_input):
             return parse_input(string_input) is not None
 
-
-        def is_winning_move(cell):
-            def is_cell_owned_by_curr_player(x_y_coords):
-                cell = grid.fetch_cell(x_y_coords[0], x_y_coords[1])
-                logging.debug(f"fetched from coords {x_y_coords}: {cell}")
-                return cell.symbol == player.symbol
-
-            def all_cells_owned_by_curr_player(cell_coordinates_sequence):
-                result =  all(is_cell_owned_by_curr_player(cell) for cell in cell_coordinates_sequence)
-                logging.debug(f"processing intersection: {cell_coordinates_sequence} yields: {result}")
-                return result
-
-            intersections = cell.get_adjoining_cells()  # rows, columns, and maybe diagonals that intersect cell
-            logging.debug(f"intersections: {intersections}")
-            any_intersection_owned = any(all_cells_owned_by_curr_player(cell_coord_seq) for cell_coord_seq in intersections)
-            logging.debug(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
-            return any_intersection_owned
 
         msg = f"\nYour move, {player.name},  Enter x,y coordinates of free cell (each coord > 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
@@ -154,26 +137,5 @@ class UI:
 
         cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
         grid.update_cell(coords[0], coords[1], cell)
-        if (is_winning_move(cell)):
+        if (grid.is_winning_move(cell, player)):
             grid.winner = cell.symbol
-
-
-
-    def report_game_result(self, grid):
-        pass
-
-
-if __name__ == "__main__":
-    #result = UI().get_nonnull_input("enter something")
-    #print(f"res: {result}")
-    def validator(string):
-        return len(string) > 0
-
-    grid = UI().game_grid_from_user_input()
-    player = UI().player_from_user_input()
-    print(f"player: {player}")
-    UI().display_game_grid(grid)
-    UI().update_grid_with_player_move(grid, player)
-    UI().display_game_grid(grid)
-
-
