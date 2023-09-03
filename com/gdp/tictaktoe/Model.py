@@ -1,3 +1,6 @@
+import logging
+
+
 class Player:
     def __init__(self, name, goes_first, symbol):
         self.name = name
@@ -28,14 +31,14 @@ class Cell:
         coords = [i for i in range(self.grid_size)]
         if (dim > 0):
             coords.reverse()
-        print(f"__get_adjacent_cells_in_diagonal_for_dimension__ cell: {self}: dim: {dim}. result: {coords}")
+        logging.debug(f"__get_adjacent_cells_in_diagonal_for_dimension__ cell: {self}: dim: {dim}. result: {coords}")
         return coords
 
     def __get_adjacent_cells_in_diagonal(self):
         x_coords_for_adjacents = self.__get_adjacent_cells_in_diagonal_for_dimension__(self.x)
         y_coords_for_adjacents = self.__get_adjacent_cells_in_diagonal_for_dimension__(self.y)
         retval = list(zip(x_coords_for_adjacents, y_coords_for_adjacents))
-        print(f"__get_adjacent_cells_in_diagonal cell: {self}: {retval}")
+        logging.debug(f"__get_adjacent_cells_in_diagonal cell: {self}: {retval}")
         return retval
 
     """
@@ -55,7 +58,7 @@ class Cell:
         adjoining_cells = [col, row]
 
         if (self.x % (self.grid_size - 1) == 0 and self.y % (self.grid_size - 1) == 0):
-            print(f"Cell {self} identified as corner cell")
+            logging.debug(f"Cell {self} identified as corner cell")
             adjoining_cells.append(self.__get_adjacent_cells_in_diagonal())
 
         return adjoining_cells
@@ -65,25 +68,25 @@ class Cell:
 def cell_factory(x, y, max_index):
     return Cell('_', x, y, max_index)
 
+
+"""
+A class representing an  MxM 2-D grid structure that stores arbitrary objects.
+
+Attributes:
+    max_dimension (int): The number of columns/rows in the grid.
+    object_factory (callable): A callable that generates objects for grid cells.
+
+Methods:
+    fetch(x, y): Fetches the object at the specified grid coordinates.
+
+Example:
+    def random_number_factory():
+        return random.randint(1, 100)
+    grid = Grid(4, random_number_factory)
+    element = grid.fetch(1, 2)
+    print(element)  # Print the element at position (1, 2)
+"""
 class Grid:
-
-    """
-    A class representing an  MxM 2-D grid structure that stores arbitrary objects.
-
-    Attributes:
-        max_dimension (int): The number of columns/rows in the grid.
-        object_factory (callable): A callable that generates objects for grid cells.
-
-    Methods:
-        fetch(x, y): Fetches the object at the specified grid coordinates.
-
-    Example:
-        def random_number_factory():
-            return random.randint(1, 100)
-        grid = Grid(4, random_number_factory)
-        element = grid.fetch(1, 2)
-        print(element)  # Print the element at position (1, 2)
-    """
 
     def __init__(self, max_index, object_factory=cell_factory):
         self.num_rows = max_index
@@ -102,7 +105,9 @@ class Grid:
         if not (0 <= x < self.max_index) or not (0 <= y < self.max_index):
             raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
 
-
+    """
+    Determine if there are any remaining moves on board
+    """
     def moves_left(self):
         if (self.winner != None):
             return False                # we have a winner, not accepting any more moves

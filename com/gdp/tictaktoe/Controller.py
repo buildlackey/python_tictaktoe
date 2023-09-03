@@ -4,6 +4,10 @@ from com.gdp.tictaktoe import Model
 from com.gdp.tictaktoe import View
 
 
+"""
+Assists controller in determining which player is next to move. We key off the answer of our
+external player to the question 'do you wish to go first' ? 
+"""
 class NextPlayerToMove():
 
     def __init__(self, player1: Model.Player, player2: Model.Player):
@@ -17,7 +21,12 @@ class NextPlayerToMove():
         self.moveCount += 1
         return nextPlayer
 
-
+"""
+Sets up the grid, identifies external player and prompts that player to choose their name, symbol, 
+and whether or not to go first.   For each game will loop through process of getting players move until
+a winning move or draw (no more positions open on board) is detected.  After each game concludes the
+external player has the option of continuing for another round of play.
+"""
 class GameSessionController:
     def __init__(self):
         self.ui = View.UI()
@@ -29,6 +38,9 @@ class GameSessionController:
             my_player_symbol = 'X'
         self.my_player = Model.Player("SomeCheapAI", not self.opponent.goes_first, my_player_symbol)
         self.next_to_move = NextPlayerToMove(self.my_player, self.opponent)
+
+    def get_grid(self):
+        return self.grid
 
 
     def start(self):
@@ -43,7 +55,7 @@ class GameSessionController:
                 if not self.grid.moves_left():
                     self.ui.announce_winner(self.grid)
                     if (self.ui.get_users_yes_no_response("Play again? (y/n)") == 'N'):
-                        sys.exit(0)
+                        return
 
 
 

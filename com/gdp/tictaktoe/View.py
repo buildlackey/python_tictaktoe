@@ -1,7 +1,11 @@
 import re
+import logging
+
 from com.gdp.tictaktoe import Model
 
-
+"""
+Renders the state of the game board as a printable string
+"""
 class GridView:
     def __init__(self):
         pass
@@ -26,17 +30,22 @@ class GridView:
             aligned_strings.append(" ".join(row_values))
         return "\n\n".join(aligned_strings)
 
-
+"""
+This class is responsible for acquiring user input, displaying the game baord, and the status of the
+game (announcing winning players, or draws, etc).
+"""
 class UI:
     def __init__(self):
         self.grid_view = GridView()
 
+    def get_grid_view(self):
+        return self.grid_view
 
     def announce_winner(self, grid):
         if grid.get_winner:
-            print(f"Game has been won by player who wisely chose '{grid.winner}'. Congratulations!\n")
+            print(f"\nGame has been won by player who wisely chose '{grid.winner}'. Congratulations!\n")
         else:
-            print(f"Game resulted in a draw\n")
+            print(f"\nGame resulted in a draw\n")
         self.display_game_grid(grid)
 
     def get_restricted_input(self, prompt, valid_responses):
@@ -132,24 +141,25 @@ class UI:
         def is_winning_move(cell):
             def is_cell_owned_by_curr_player(x_y_coords):
                 cell = grid.fetch_cell(x_y_coords[0], x_y_coords[1])
-                print(f"fetched from coords {x_y_coords}: {cell}")
+                logging.debug(f"fetched from coords {x_y_coords}: {cell}")
                 return cell.symbol == player.symbol
 
             def all_cells_owned_by_curr_player(cell_coordinates_sequence):
                 result =  all(is_cell_owned_by_curr_player(cell) for cell in cell_coordinates_sequence)
-                print(f"processing intersection: {cell_coordinates_sequence} yields: {result}")
+                logging.debug(f"processing intersection: {cell_coordinates_sequence} yields: {result}")
                 return result
 
             intersections = cell.get_adjoining_cells()  # rows, columns, and maybe diagonals that intersect cell
-            print(f"intersections: {intersections}")
+            logging.debug(f"intersections: {intersections}")
             any_intersection_owned = any(all_cells_owned_by_curr_player(cell_coord_seq) for cell_coord_seq in intersections)
-            print(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
+            logging.debug(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
             return any_intersection_owned
 
         msg = f"\nYour move, {player.name},  Enter x,y coordinates of unoccupied cell (> 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
-        print(f"coords: {coords}")
+        logging.debug(f"coords: {coords}")
+
         cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
         grid.update_cell(coords[0], coords[1], cell)
         if (is_winning_move(cell)):
