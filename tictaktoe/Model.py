@@ -2,13 +2,17 @@ import logging
 
 
 class Player:
-    def __init__(self, name, goes_first, symbol):
+    def __init__(self, name, goes_first, symbol, gen_move_factory_func):
         self.name = name
         self.goes_first = goes_first
         self.symbol = str(symbol).lower()
+        self.gen_move_factory_func = gen_move_factory_func
 
     def __str__(self):
         return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"
+
+    def move(self):
+        self.gen_move_factory_func(self)
 
 
 class Cell:

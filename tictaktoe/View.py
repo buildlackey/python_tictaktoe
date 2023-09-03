@@ -76,11 +76,13 @@ class UI:
 
 
 
-    def player_from_user_input(self):
+    def player_from_user_input(self, next_move_factory):
         player_name = self.get_nonnull_input("Please input player name: ")
         goes_first = self.get_restricted_input("Do you want to go first? (Y/N): ", ["Y", "N"])
         symbol = self.get_restricted_input("Please choose letter representing your moves ('X' or 'O'): ", ["X", "O"])
-        return Model.Player(player_name, goes_first.upper() == 'Y', symbol)
+        return Model.Player(player_name, goes_first.upper() == 'Y', symbol, next_move_factory)
+
+
 
     def game_grid_from_user_input(self):
         def check_bounds(value):

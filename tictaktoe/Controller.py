@@ -34,17 +34,25 @@ a winning move or draw (no more positions open on board) is detected.  After eac
 external player has the option of continuing for another round of play.
 """
 class GameSessionController:
-    def __init__(self):
-        self.ui = View.UI()
-        self.grid = self.ui.game_grid_from_user_input()
-        self.grid_dimension = self.grid.max_index
-        self.opponent = self.ui.player_from_user_input()
+
+    def __init_player_state(self, ui: View.UI, grid: Model.Grid, human_mode):
+        def next_move_factory(player: Model.Player):                # default factory for getting next move
+            ui.update_grid_with_player_move(grid, player)
+
+        self.opponent = self.ui.player_from_user_input(next_move_factory)
         if self.opponent.symbol == 'X':
             my_player_symbol = 'O'
         else:
             my_player_symbol = 'X'
-        self.my_player = Model.Player("SomeCheapAI", not self.opponent.goes_first, my_player_symbol)
+        self.my_player = Model.Player("SomeCheapAI", not self.opponent.goes_first, my_player_symbol, next_move_factory)
         self.next_to_move = NextPlayerToMove(self.my_player, self.opponent)
+
+    def __init__(self, human_mode=False):
+        self.ui = View.UI()
+        self.grid = self.ui.game_grid_from_user_input()
+        self.grid_dimension = self.grid.max_index
+        self.__init_player_state(self.ui, self.grid, human_mode)
+
 
     def get_grid(self):
         return self.grid
