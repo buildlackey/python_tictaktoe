@@ -100,17 +100,23 @@ class UI:
 
     def update_grid_with_player_move(self, grid: Model.Grid, player: Model.Player):
         """
-        Prompts a player to enter the coordinates of their next move, and updates 'grid' to
+        Prompts player to enter the coordinates of a free cell where they wish to make their next move,
+
+       # TODO -document->
+        updates 'grid' to
         player's chosen letter ('X' or 'O').  Detects if this move is a winning move by
         examining all columns, rows (and possibly diagonals in the case of a corner cell) to
         check if any one contains only one distinct letter for all cells in the examined sequence.
 
-        Args:
-            grid:  the grid to update
-            player: the player making the move.  If this is a winning move, said player may be declared winner
-                    (by updating state in the grid that tracks if someone has already won)
+            If this is a winning move, said player may be declared winner (by updating state in the grid that tracks if someone has already won)
 
-        Returns:
+        Args:
+            grid:  the grid where the move needs to be chosen
+            player: the player making the move.
+
+        Invariants:  the game grid must have available moves, and no established winner
+
+        Returns: The cell with player's chosen coordinates.
 
         """
         def parse_input(input_str):
@@ -130,12 +136,12 @@ class UI:
             return parse_input(string_input) is not None
 
 
+        assert grid.moves_left()
+
         msg = f"\nYour move, {player.name},  Enter x,y coordinates of free cell (each coord > 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
         logging.debug(f"coords: {coords}")
 
         cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
-        grid.update_cell(coords[0], coords[1], cell)
-        if (grid.is_winning_move(cell, player)):
-            grid.winner = cell.symbol
+        return cell

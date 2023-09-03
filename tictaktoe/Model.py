@@ -1,4 +1,5 @@
 import logging
+import copy
 
 
 """
@@ -17,7 +18,9 @@ class Player:
         return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"
 
     def move(self, grid):
-        self.gen_move_factory_func(self, grid)
+        cell =  self.gen_move_factory_func(self, grid)
+        logging.debug(f"moving to cell: {cell}")
+        return cell
 
 
 class Cell:
@@ -125,12 +128,14 @@ class Grid:
         for x in range(self.max_index):
             for y in range(self.max_index):
                 cell = self.fetch_cell(x, y)
-                if cell.symbol != '_':
+                if cell.symbol == '_':
                     logging.debug(f"cell at ({x},{y}) is {cell.symbol}")
                     remaining = True
         return remaining
 
-    def update_cell(self, x, y, cell):
+    def update_cell(self, cell):
+        x = cell.x
+        y = cell.y
         self.__validate_coords__( x, y)
         self.grid[(x, y)] = cell
 
@@ -143,8 +148,32 @@ class Grid:
         self.winner = None
         for x in range(self.max_index):
             for y in range(self.max_index):
-                self.update_cell(x, y, Cell('_', x, y, self.max_index))
+                self.update_cell(Cell('_', x, y, self.max_index))
 
+
+    """
+    Applies the move indicated by the position of the input parameter 'cell' to the grid by creating a copy and 
+    updating that copies corresponding x,y position to point to 'cell'.  The original grid state is not modified.
+    The new copy is checked to see if this latest move is a winning move, and is marked accordingly.
+    """
+    def apply_move(self, cell, player_making_this_move):
+        assert self.moves_left()        # shouldn't apply moves if no more available
+
+        new_grid = copy.deepcopy(self)
+        new_grid.update_cell(cell)
+
+        if (new_grid.is_winning_move(cell, player_making_this_move)):
+            new_grid.winner = cell.symbol                       # Yup - it's a winning move.  mark it !
+
+        return new_grid
+
+
+    """
+        Detects if the move indicated by the position of the input parameter 'cell'  is a winning move.
+        This determination is made by examining all columns, rows (and possibly diagonals in 
+        the case of a corner cell) that intersect with 'cell'.  If we find any 'intersecting sequence' which 
+        contains only one distinct letter for all cells in that sequence we indicate a winning move has been found.
+    """
     def is_winning_move(self, cell, player_making_this_move):
         def is_cell_owned_by_curr_player(x_y_coords):
             cell = self.fetch_cell(x_y_coords[0], x_y_coords[1])

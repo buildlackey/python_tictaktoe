@@ -37,7 +37,7 @@ class GameSessionController:
 
     def __init_player_state(self, ui: View.UI,  human_mode):
         def next_move_factory(player: Model.Player, grid: Model.Grid): # default factory for getting next move
-            ui.update_grid_with_player_move(grid, player)
+            return ui.update_grid_with_player_move(grid, player)
 
         self.opponent = self.ui.player_from_user_input(next_move_factory)
         if self.opponent.symbol == 'X':
@@ -68,7 +68,8 @@ class GameSessionController:
             while self.grid.winner == None :
                 self.ui.display_game_grid(self.grid)
                 player = self.whose_turn.get()
-                player.move(self.grid)
+                cell = player.move(self.grid)
+                self.grid = self.grid.apply_move(cell, player)  # get new grid copy updated with this move
 
                 if not self.grid.moves_left():
                     self.ui.announce_winner(self.grid)
