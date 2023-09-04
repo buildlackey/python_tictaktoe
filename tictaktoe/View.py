@@ -3,44 +3,12 @@ import logging
 
 from tictaktoe import Model
 
-"""
-Renders the state of the game board as a printable string
-"""
-class GridView:
-    def __init__(self):
-        pass
-
-    def __calculate_cell_width__(self, grid):
-        max_width = 0
-        for y in range(grid.num_rows):
-            for x in range(grid.num_columns):
-                value = grid.fetch_cell(x, y)
-                cell_width = len(str(value))
-                max_width = max(max_width, cell_width)
-        return max_width
-
-    def render_as_string(self, grid):
-        cell_width = self.__calculate_cell_width__(grid)
-        aligned_strings = []
-        for y in range(grid.num_rows):
-            row_values = []
-            for x in range(grid.num_columns):
-                cell = grid.fetch_cell(x, y)
-                row_values.append(str(cell).rjust(cell_width))
-            aligned_strings.append(" ".join(row_values))
-        return "\n\n".join(aligned_strings)
 
 """
-This class is responsible for acquiring user input, displaying the game baord, and the status of the
-game (announcing winning players, or draws, etc).
+Acquires user input, writes current state of game board to console, and annouces the status of the
+game (announcing winning plays, draws, etc).
 """
 class UI:
-    def __init__(self):
-        self.grid_view = GridView()
-
-    def get_grid_view(self):
-        return self.grid_view
-
     def announce_winner(self, grid):
         if grid.get_winner:
             print(f"\nGame has been won by player who wisely chose '{grid.winner}'. Congratulations!\n")
@@ -96,29 +64,20 @@ class UI:
         return Model.Grid(int(max_index))
 
     def display_game_grid(self, grid):
-        print(f"\n{self.grid_view.render_as_string(grid)}")
+        print(f"\n{grid.render_as_string()}")
 
-    def update_grid_with_player_move(self, grid: Model.Grid, player: Model.Player):
-        """
-        Prompts player to enter the coordinates of a free cell where they wish to make their next move,
+    """
+    Prompts player to enter the coordinates of a free cell where they wish to make their next move,
 
-       # TODO -document->
-        updates 'grid' to
-        player's chosen letter ('X' or 'O').  Detects if this move is a winning move by
-        examining all columns, rows (and possibly diagonals in the case of a corner cell) to
-        check if any one contains only one distinct letter for all cells in the examined sequence.
+    Args:
+        grid:  the grid where the move needs to be chosen
+        player: the player making the move.
 
-            If this is a winning move, said player may be declared winner (by updating state in the grid that tracks if someone has already won)
+    Invariants:  the game grid must have available moves, and no established winner
 
-        Args:
-            grid:  the grid where the move needs to be chosen
-            player: the player making the move.
-
-        Invariants:  the game grid must have available moves, and no established winner
-
-        Returns: The cell with player's chosen coordinates.
-
-        """
+    Returns: The cell with player's chosen coordinates.
+    """
+    def prompt_for_coords_of_next_move(self, grid: Model.Grid, player: Model.Player):
         def parse_input(input_str):
             # Define a regular expression pattern to match two integers separated by non-numeric characters
             pattern = r'[^0-9]*([0-9]+)[^0-9]+([0-9]+)[^0-9]*'
@@ -128,7 +87,7 @@ class UI:
                 x = int(match.group(1))
                 y = int(match.group(2))
                 if (x >= 0 and x < grid.max_index and y >= 0 and y < grid.max_index):
-                    if grid.fetch_cell(x, y).symbol == '_':
+                    if grid.get_cell(x, y).is_free():
                         return [x, y]
             return None
 
@@ -141,7 +100,7 @@ class UI:
         msg = f"\nYour move, {player.name},  Enter x,y coordinates of free cell (each coord > 0 and < {grid.max_index}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
-        logging.debug(f"coords: {coords}")
+        logging.debug(f"for next move position, human player {player} selected coords: {coords}")
 
         cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
         return cell

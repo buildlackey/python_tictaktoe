@@ -1,7 +1,6 @@
 import logging
-import sys
 
-from tictaktoe import Model, View
+from tictaktoe import Model, View, AiBot
 
 """
 Assists controller in determining which player is next to move. We key off the answer of our
@@ -23,35 +22,44 @@ class NextPlayerToMove():
     def get(self):
         index_of_next_player = self.moveCount % 2
         nextPlayer = self.players[index_of_next_player]
-        logging.debug(f"nextTracker: {self}. index: {index_of_next_player}: {nextPlayer}")
+        logging.debug(f"nextTracker: {self}. index: {index_of_next_player}: NextUp: {nextPlayer}")
         self.moveCount += 1
         return nextPlayer
 
 """
-Sets up the grid, identifies external player and prompts that player to choose their name, symbol, 
-and whether or not to go first.   For each game will loop through process of getting players move until
-a winning move or draw (no more positions open on board) is detected.  After each game concludes the
-external player has the option of continuing for another round of play.
+Sets up the grid, prompts the external player for their name, prefered game symbol ('x' or 'o'), 
+and whether or not to go first.   For each game round the controller will loop through process of getting players 
+moves until a winning move or draw (no more positions open on board) is detected.  Upon conclusion of each game
+the external player has the option of continuing for another round of play.
 """
 class GameSessionController:
+    def __init_player_state(self, ui: View.UI, use_human_input_for_all_players, ai_next_move_factory):
+        def next_move_from_ui_input(player: Model.Player, grid: Model.Grid): # factory for getting next move from human
+            return ui.prompt_for_coords_of_next_move(grid, player)
 
-    def __init_player_state(self, ui: View.UI,  human_mode):
-        def next_move_factory(player: Model.Player, grid: Model.Grid): # default factory for getting next move
-            return ui.update_grid_with_player_move(grid, player)
+        def next_move_from_ai_bot(player: Model.Player, grid: Model.Grid): # next move factory using machine intelligence
+            return ai_next_move_factory.get_move(grid, player)
 
-        self.opponent = self.ui.player_from_user_input(next_move_factory)
-        if self.opponent.symbol == 'X':
-            my_player_symbol = 'O'
+        self.external_player = self.ui.player_from_user_input(next_move_from_ui_input)
+
+        # set up state that drives behavior of internal player
+        if self.external_player.symbol == 'X':
+            symbol = 'O'        # internal player symbol is 'o'
         else:
-            my_player_symbol = 'X'
-        self.my_player = Model.Player("SomeCheapAI", not self.opponent.goes_first, my_player_symbol, next_move_factory)
-        self.whose_turn = NextPlayerToMove(self.my_player, self.opponent)
+            symbol = 'X'        # internal player symbol is 'x'
+        goes_first =  not self.external_player.goes_first
+        if (use_human_input_for_all_players):
+            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ui_input)
+        else:
+            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ai_bot)
+
+        self.whose_turn = NextPlayerToMove(self.internal_player, self.external_player)
 
     def __init__(self, human_mode=False):
         self.ui = View.UI()
         self.grid = self.ui.game_grid_from_user_input()
         self.grid_dimension = self.grid.max_index
-        self.__init_player_state(self.ui, human_mode)
+        self.__init_player_state(self.ui, human_mode, AiBot.AiNextMoveFactory())
 
 
     def get_grid(self):

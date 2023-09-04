@@ -5,7 +5,7 @@ import copy
 """
 Represents a human or AIbot player.   The constructor accepts a factory 
 for generating this players next move. This enables us to allow a human 
-to choose the move, or delegate this task to an AI bot
+to choose the move (useful for debugging), or delegate this task to an AI bot
 """
 class Player:
     def __init__(self, name, goes_first, symbol, move_factory_func):
@@ -19,7 +19,7 @@ class Player:
 
     def move(self, grid):
         cell =  self.gen_move_factory_func(self, grid)
-        logging.debug(f"moving to cell: {cell}")
+        logging.debug(f"move selected by {self}. cell: {cell}")
         return cell
 
 
@@ -31,7 +31,10 @@ class Cell:
         self.grid_size = grid_size
 
     def __str__(self):
-        return f"{self.symbol}"
+        return f"({self.x},{self.y})->{self.symbol}"
+
+    def is_free(self):
+        return self.symbol == '_'
 
     """
     Given a horizontal or vertical index position, return all the other indices in the row or column
@@ -109,6 +112,31 @@ class Grid:
         self.winner = None
 
 
+    def __calculate_max_printable_cell_width__(self):
+        max_width = 0
+        for y in range(self.num_rows):
+            for x in range(self.num_columns):
+                value = self.get_cell(x, y).symbol
+                cell_width = len(str(value))
+                max_width = max(max_width, cell_width)
+        return max_width
+
+    """
+    Renders the state of the game board as a printable string
+    """
+    def render_as_string(self):
+        cell_width = self.__calculate_max_printable_cell_width__()
+        aligned_strings = []
+        for y in range(self.num_rows):
+            row_values = []
+            for x in range(self.num_columns):
+                cell = self.get_cell(x, y)
+                row_values.append(str(cell.symbol).rjust(cell_width))
+            aligned_strings.append(" ".join(row_values))
+        result =  "\n\n".join(aligned_strings)
+        logging.debug(f"grid render result: {result}")
+        return result
+
     def get_winner(self) -> Player:
         return self.winner
 
@@ -127,8 +155,8 @@ class Grid:
         remaining = False
         for x in range(self.max_index):
             for y in range(self.max_index):
-                cell = self.fetch_cell(x, y)
-                if cell.symbol == '_':
+                cell = self.get_cell(x, y)
+                if cell.is_free():
                     logging.debug(f"cell at ({x},{y}) is {cell.symbol}")
                     remaining = True
         return remaining
@@ -140,7 +168,7 @@ class Grid:
         self.grid[(x, y)] = cell
 
 
-    def fetch_cell(self, x, y) -> Cell:
+    def get_cell(self, x, y) -> Cell:
         self.__validate_coords__( x, y)
         return self.grid.get((x, y), None)
 
@@ -153,7 +181,7 @@ class Grid:
 
     """
     Applies the move indicated by the position of the input parameter 'cell' to the grid by creating a copy and 
-    updating that copies corresponding x,y position to point to 'cell'.  The original grid state is not modified.
+    updating that copy's corresponding x,y position to point to 'cell'.  The original grid state is not modified.
     The new copy is checked to see if this latest move is a winning move, and is marked accordingly.
     """
     def apply_move(self, cell, player_making_this_move):
@@ -165,6 +193,7 @@ class Grid:
         if (new_grid.is_winning_move(cell, player_making_this_move)):
             new_grid.winner = cell.symbol                       # Yup - it's a winning move.  mark it !
 
+        logging.debug(f"{player_making_this_move}: SELECTS: {cell}. result -> {new_grid.render_as_string()}")
         return new_grid
 
 
@@ -176,8 +205,8 @@ class Grid:
     """
     def is_winning_move(self, cell, player_making_this_move):
         def is_cell_owned_by_curr_player(x_y_coords):
-            cell = self.fetch_cell(x_y_coords[0], x_y_coords[1])
-            logging.debug(f"fetched from coords {x_y_coords}: {cell}")
+            cell = self.get_cell(x_y_coords[0], x_y_coords[1])
+            logging.debug(f"result of fetch via coords {x_y_coords}: {cell}")
             return cell.symbol == player_making_this_move.symbol
 
         def all_cells_owned_by_curr_player(cell_coordinates_sequence):

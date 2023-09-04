@@ -12,11 +12,11 @@ def test_main_program(monkeypatch):
     # Monkeypatch the input function with the mock_input function
     monkeypatch.setattr('builtins.input', mock_input)
 
-    controller = Controller.GameSessionController()
+    controller = Controller.GameSessionController(True)
     controller.start()
 
     grid = controller.get_grid()
     assert(grid.winner == 'o')
 
-    grid_as_string = View.UI().grid_view.render_as_string(grid)
+    grid_as_string = grid.render_as_string()
     assert grid_as_string == "o _\n\no x"
