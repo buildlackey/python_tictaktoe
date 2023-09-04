@@ -49,9 +49,9 @@ class GameSessionController:
             symbol = 'X'        # internal player symbol is 'x'
         goes_first =  not self.external_player.goes_first
         if (use_human_input_for_all_players):
-            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ui_input)
+            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ui_input, True)
         else:
-            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ai_bot)
+            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ai_bot, True)
 
         self.whose_turn = NextPlayerToMove(self.internal_player, self.external_player)
 
@@ -59,6 +59,7 @@ class GameSessionController:
         self.ui = View.UI()
         self.grid = self.ui.game_grid_from_user_input()
         self.grid_dimension = self.grid.max_index
+        self.human_mode = human_mode
         self.__init_player_state(self.ui, human_mode, AiBot.AiNextMoveFactory())
 
 
@@ -77,6 +78,7 @@ class GameSessionController:
                 self.ui.display_game_grid(self.grid)
                 player = self.whose_turn.get()
                 cell = player.move(self.grid)
+                self.ui.announce_internal_player_move(player, cell, self.human_mode)
                 self.grid = self.grid.apply_move(cell, player)  # get new grid copy updated with this move
 
                 if not self.grid.moves_left():
@@ -87,7 +89,7 @@ class GameSessionController:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
-    GameSessionController(True).start()
+    #logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
+    GameSessionController(False).start()
 
 

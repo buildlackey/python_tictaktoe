@@ -8,11 +8,12 @@ for generating this players next move. This enables us to allow a human
 to choose the move (useful for debugging), or delegate this task to an AI bot
 """
 class Player:
-    def __init__(self, name, goes_first, symbol, move_factory_func):
+    def __init__(self, name, goes_first, symbol, move_factory_func, is_internal_player):
         self.name = name
         self.goes_first = goes_first
         self.symbol = str(symbol).lower()
         self.gen_move_factory_func = move_factory_func
+        self.is_internal_player = is_internal_player
 
     def __str__(self):
         return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"

@@ -48,7 +48,7 @@ class UI:
         player_name = self.get_nonnull_input("Please input player name: ")
         goes_first = self.get_restricted_input("Do you want to go first? (Y/N): ", ["Y", "N"])
         symbol = self.get_restricted_input("Please choose letter representing your moves ('X' or 'O'): ", ["X", "O"])
-        return Model.Player(player_name, goes_first.upper() == 'Y', symbol, next_move_factory)
+        return Model.Player(player_name, goes_first.upper() == 'Y', symbol, next_move_factory, False)
 
 
 
@@ -64,7 +64,7 @@ class UI:
         return Model.Grid(int(max_index))
 
     def display_game_grid(self, grid):
-        print(f"\n{grid.render_as_string()}")
+        print(f"\nGame Board:\n{grid.render_as_string()}")
 
     """
     Prompts player to enter the coordinates of a free cell where they wish to make their next move,
@@ -104,3 +104,9 @@ class UI:
 
         cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
         return cell
+
+    def announce_internal_player_move(self, player, cell, human_mode):
+        if (human_mode or not player.is_internal_player):      #  if a human selected move then don't need a reminder
+            return
+        else:
+            print(f"\nPlayer {player.name} selected cell at ({cell.x},{cell.y}) for next move")
