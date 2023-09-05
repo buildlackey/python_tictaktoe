@@ -47,10 +47,7 @@ class GameSessionController:
         self.external_player = self.ui.player_from_user_input(next_move_from_ui_input)
 
         # set up state that drives behavior of internal player
-        if self.external_player.symbol == 'X':
-            symbol_internal = 'O'        # internal player symbol is 'o'
-        else:
-            symbol_internal = 'X'        # internal player symbol is 'x'
+        symbol_internal = self.external_player.get_opponent_symbol()
         goes_first =  not self.external_player.goes_first
         if (use_human_input_for_all_players):
             self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol_internal, next_move_from_ui_input, True)

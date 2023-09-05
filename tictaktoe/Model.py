@@ -4,7 +4,7 @@ from typing import List
 
 free_cell_symbol = '_'
 x_symbol = 'x'
-y_symbol = 'y'
+o_symbol = 'o'
 
 class Cell:
     def __init__(self, symbol, x, y, grid_size):
@@ -98,6 +98,13 @@ class Player:
         logging.debug(f"move selected by {self}. cell: {cell}")
         return cell
 
+    def get_opponent_symbol(self):
+        if (self.symbol.lower() == o_symbol):
+            return x_symbol
+        elif (self.symbol.lower() == x_symbol):
+            return o_symbol
+        else:
+            raise ValueError(f"illegal value for my symbol: {self.symbol}")
 
 """
 A class representing an  MxM 2-D grid structure that stores arbitrary objects.
