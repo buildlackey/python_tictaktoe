@@ -23,3 +23,13 @@ def test_adjoining_cells(configure_logging):
     cell = Model.Cell('X', 1, 1, 3)
     assert cell.get_adjoining_cells() == [[(1, 0), (1, 1), (1, 2)], [(0, 1), (1, 1), (2, 1)], [(2, 2), (1, 1), (0, 0)]]
 
+
+
+def test_empty_grid(configure_logging):
+    grid = Model.Grid(3)
+
+    assert(grid.is_board_empty())
+
+    grid.update_cell(Model.Cell('x',2,1,3))
+    assert(not grid.is_board_empty())
+

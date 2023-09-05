@@ -28,6 +28,28 @@ def test_on_2by2_grid(configure_logging):
 
 
 
+
+
+def test_more(configure_logging):
+    player1 = Model.Player("one", True, 'x', None, False)
+    player2 = Model.Player("two", False, 'o', None, True)
+    grid = Model.Grid(3)
+
+    next_move_factory = AiBot.AiNextMoveFactory()
+    next_move_factory.set_players(player1, player2)
+
+    # 9! outcomes make the test run a little too slow... So occupy some board position to reduce the search space
+    grid.update_cell(Model.Cell('x',1,1,3))
+
+    print("THE GRID")
+    print(grid.render_as_string())
+    print("THE GRID")
+
+    game_outcomes = next_move_factory.all_game_outcomes(grid, player1, 1, [])
+    assert any(x.score == 1 and x.grid.winner == 'x' for x in game_outcomes)
+    print(f"game_outcomes: {game_outcomes}")
+
+
 def test_3by3_get_all_expected_outcomes(configure_logging):
     player1 = Model.Player("one", True, 'x', None, True)
     player2 = Model.Player("two", False, 'o', None, False)

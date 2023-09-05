@@ -1,6 +1,6 @@
 import logging
 import copy
-
+from typing import List
 
 class Cell:
     def __init__(self, symbol, x, y, grid_size):
@@ -123,7 +123,7 @@ class Grid:
         self.winner = None
 
 
-    def __calculate_max_printable_cell_width__(self):
+    def __calculate_max_printable_cell_width__(self) -> int:
         max_width = 0
         for y in range(self.num_rows):
             for x in range(self.num_columns):
@@ -149,7 +149,7 @@ class Grid:
     """
     Renders the state of the game board as a printable string
     """
-    def render_as_string(self):
+    def render_as_string(self) -> str:
         cell_width = self.__calculate_max_printable_cell_width__()
         aligned_strings = []
         for y in range(self.num_rows):
@@ -165,7 +165,7 @@ class Grid:
     def get_winner(self) -> Player:
         return self.winner
 
-    def get_free_cells(self):
+    def get_free_cells(self) -> List[Cell]:
         free_cells = []
         for y in range(self.num_rows):
             for x in range(self.num_columns):
@@ -179,12 +179,15 @@ class Grid:
     """
     Determine if there are any remaining moves on board
     """
-    def moves_left(self):
+    def moves_left(self) -> bool:
         if (self.winner != None):
             logging.debug("Already have a winner")
             return False                # we have a winner, not accepting any more moves
         return self.get_free_cells()  != []
 
+
+    def is_board_empty(self) -> bool:
+        return (len(self.get_free_cells()) == self.max_index*self.max_index)
 
     def get_cell(self, x, y) -> Cell:
         self.__validate_coords__( x, y)
@@ -221,7 +224,7 @@ class Grid:
         the case of a corner cell) that intersect with 'cell'.  If we find any 'intersecting sequence' which 
         contains only one distinct letter for all cells in that sequence we indicate a winning move has been found.
     """
-    def is_winning_move(self, cell, player_making_this_move):
+    def is_winning_move(self, cell, player_making_this_move) -> bool:
         def is_cell_owned_by_curr_player(x_y_coords):
             cell = self.get_cell(x_y_coords[0], x_y_coords[1])
             logging.debug(f"result of fetch via coords {x_y_coords}: {cell}")

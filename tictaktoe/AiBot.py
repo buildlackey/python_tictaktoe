@@ -60,9 +60,22 @@ class AiNextMoveFactory:
         best_candidate = None
 
         for candidate in outcomes:
-            if (candidate.score > best_score_so_far):
+            if (candidate.score and  candidate.score > best_score_so_far):
                 best_candidate = candidate
                 best_score_so_far = candidate.score
+
+        return best_candidate
+
+
+    #TODO -remove this. not needed
+    """
+    Select random cell from remaining free positions on board. This method should only be called if no winning 
+    combination of moves can be discovered, and when the board remains unfilled.
+    """
+    def __get_random_cell(self, grid: Model.Grid):
+        return grid.get_free_cells()[0]
+
+
 
         return best_candidate
 
@@ -92,12 +105,22 @@ class AiNextMoveFactory:
             return flattened_result
 
     def get_move(self, grid: Model.Grid, player_who_must_move: Model.Player) -> Model.Cell:
+        if (grid.is_board_empty()):  # heuristic: reduce search space, grab center (or close as possible on diagonal)
+            center_index = int(grid.max_index/2)  # if grid w/ even number max dimension, this is close enough to center
+            center_cell =  Model.Cell(player_who_must_move.symbol, center_index, center_index, grid.max_index)
+            logging.debug(f"applying heuristic of grabbing as cell as close to center as possible on free board")
+            return center_cell
+
         index_of_player_with_current_turn  = self.__get_index_of_player(player_who_must_move)
         all_game_outcomes = self.all_game_outcomes(grid, player_who_must_move, index_of_player_with_current_turn, [])
 
         best = self.__highest_scoring_outcome__(all_game_outcomes)
-        logging.debug(f"best score identified: {best}")
-        return best.list_of_moves[0]
+        if (not best):      # no best score if all outcomes are tied
+            logging.debug(f"no best score identified: {best}. Need something, so selecting first free cell we see")
+            return grid.get_free_cells()[0]
+        else:
+            logging.debug(f"best score identified: {best}")
+            return best.list_of_moves[0]
 
 
 if __name__ == "__main__":      ## TODO - don't need .. delete
