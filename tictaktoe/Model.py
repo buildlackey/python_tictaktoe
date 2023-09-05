@@ -2,28 +2,6 @@ import logging
 import copy
 
 
-"""
-Represents a human or AIbot player.   The constructor accepts a factory 
-for generating this players next move. This enables us to allow a human 
-to choose the move (useful for debugging), or delegate this task to an AI bot
-"""
-class Player:
-    def __init__(self, name, goes_first, symbol, move_factory_func, is_internal_player):
-        self.name = name
-        self.goes_first = goes_first
-        self.symbol = str(symbol).lower()
-        self.move_factory_func = move_factory_func
-        self.is_internal_player = is_internal_player
-
-    def __repr__(self):
-        return f"[Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}]"
-
-    def move(self, grid):
-        cell =  self.move_factory_func(self, grid)
-        logging.debug(f"move selected by {self}. cell: {cell}")
-        return cell
-
-
 class Cell:
     def __init__(self, symbol, x, y, grid_size):
         self.symbol = symbol
@@ -79,7 +57,11 @@ class Cell:
         row = [(x,self.y) for x in other_indices_in_row ]
         adjoining_cells = [col, row]
 
-        if (self.x % (self.grid_size - 1) == 0 and self.y % (self.grid_size - 1) == 0):
+
+        is_edge_cell =  (self.x % (self.grid_size - 1) == 0 and self.y % (self.grid_size - 1) == 0)
+        is_corner_cell = (self.x == self.y)
+
+        if (is_edge_cell or is_corner_cell):
             logging.debug(f"Cell {self} identified as corner cell")
             adjoining_cells.append(self.__get_adjacent_cells_in_diagonal())
 
@@ -89,6 +71,28 @@ class Cell:
 
 def cell_factory(x, y, max_index):
     return Cell('_', x, y, max_index)
+
+
+"""
+Represents a human or AIbot player.   The constructor accepts a factory 
+for generating this players next move. This enables us to allow a human 
+to choose the move (useful for debugging), or delegate this task to an AI bot
+"""
+class Player:
+    def __init__(self, name, goes_first, symbol, move_factory_func, is_internal_player):
+        self.name = name
+        self.goes_first = goes_first
+        self.symbol = str(symbol).lower()
+        self.move_factory_func = move_factory_func
+        self.is_internal_player = is_internal_player
+
+    def __repr__(self):
+        return f"[Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}]"
+
+    def move(self, grid) -> Cell:
+        cell =  self.move_factory_func(self, grid)
+        logging.debug(f"move selected by {self}. cell: {cell}")
+        return cell
 
 
 """
@@ -135,7 +139,7 @@ class Grid:
     def __repr__(self):
         return f"winner: {self.winner}. cells: {self.render_as_string()}"
 
-    def __update_cell__(self, cell):
+    def update_cell(self, cell):
         x = cell.x
         y = cell.y
         self.__validate_coords__( x, y)
@@ -190,7 +194,7 @@ class Grid:
         self.winner = None
         for x in range(self.max_index):
             for y in range(self.max_index):
-                self.__update_cell__(Cell('_', x, y, self.max_index))
+                self.update_cell(Cell('_', x, y, self.max_index))
 
 
     """
@@ -202,7 +206,7 @@ class Grid:
         assert self.moves_left()        # shouldn't apply moves if no more available
 
         new_grid = copy.deepcopy(self)
-        new_grid.__update_cell__(cell)
+        new_grid.update_cell(cell)
 
         if (new_grid.is_winning_move(cell, player_making_this_move)):
             new_grid.winner = cell.symbol                       # Yup - it's a winning move.  mark it !

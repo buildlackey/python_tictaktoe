@@ -67,22 +67,22 @@ class AiNextMoveFactory:
         return best_candidate
 
     def all_game_outcomes(self,
-                          g: Model.Grid,
+                          grid: Model.Grid,
                           desired_winner: Model.Player,
                           which_player_index: int,
                           moves_so_far) -> List[ScoredGameScenario]:
-        score = self.__score__(g, desired_winner)
-        logging.debug(f"all_move_sequences. next_mover: {which_player_index}. moves_so_far:{moves_so_far}. score: {score}")
-        if (score):
-            logging.info(f"got scoreable grid with these moves: {moves_so_far}. grid: {g}")
-            return [ScoredGameScenario(score, g, moves_so_far)]
+        score = self.__score__(grid, desired_winner)
+        logging.debug(f"all_game_outcomes. next_mover: {which_player_index}. moves_so_far:{moves_so_far}. score: {score}")
+        if (score or not grid.moves_left()):
+            logging.debug(f"got scoreable grid with these moves: {moves_so_far}. grid: {grid}")
+            return [ScoredGameScenario(score, grid, moves_so_far)]
         else:
             results = []
-            cells_to_try = g.get_free_cells()
+            cells_to_try = grid.get_free_cells()
             who_moves = self.players[which_player_index]
             for cell in cells_to_try:
                 updated_cell = cell.with_symbol(who_moves.symbol)  # free cell now marked with current player's symbol
-                updated_grid = g.apply_move(updated_cell, who_moves)  # this grid will be scored in recursive calls
+                updated_grid = grid.apply_move(updated_cell, who_moves)  # this grid will be scored in recursive calls
                 updated_moves = moves_so_far + [updated_cell]
                 logging.debug(f"player {who_moves} GRID TO USE IN RECURSIVE CALL: {updated_grid}. mvs: {updated_moves}")
                 result = self.all_game_outcomes(updated_grid, desired_winner, 1 - which_player_index, updated_moves)
@@ -90,24 +90,31 @@ class AiNextMoveFactory:
                 logging.debug(f"unflattened results for cell {results}")
             flattened_result = self.__flatten_list__(results)
             return flattened_result
-    def get_move(self, grid: Model.Grid, player_who_must_move: Model.Player) -> List[int]:
+
+    def get_move(self, grid: Model.Grid, player_who_must_move: Model.Player) -> Model.Cell:
         index_of_player_with_current_turn  = self.__get_index_of_player(player_who_must_move)
         all_game_outcomes = self.all_game_outcomes(grid, player_who_must_move, index_of_player_with_current_turn, [])
 
         best = self.__highest_scoring_outcome__(all_game_outcomes)
         logging.debug(f"best score identified: {best}")
-        last_move_cell = best.list_of_moves[0]
-        return [ last_move_cell.x,last_move_cell.y ]
+        return best.list_of_moves[0]
 
 
 if __name__ == "__main__":      ## TODO - don't need .. delete
-    logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
     player1 = Model.Player("one", True, 'x', None, True)
     player2 = Model.Player("two", False, 'o', None, False)
+    grid = Model.Grid(3)
+
     next_move_factory = AiNextMoveFactory()
     next_move_factory.set_players(player1, player2)
-    game_outcomes = next_move_factory.all_game_outcomes(Model.Grid(2), player1, 0, [])
-    print(f"outcomes: {game_outcomes}")
-    assert(len(game_outcomes) == 4 * 3 * 2 * 1)   # number of outcomes for cell grid is 4!
-    assert all(outcome.grid.winner == player1.symbol for outcome in game_outcomes)
+
+    grid.update_cell(Model.Cell('o',2,0,3))
+
+    print("THE GRID")
+    print(grid.render_as_string())
+    print("THE GRID")
+
+    game_outcomes = next_move_factory.all_game_outcomes(grid, player1, 0, [])
+    assert any(x.score == 1 and x.grid.winner == 'x' for x in game_outcomes)
+    print(f"game_outcomes: {game_outcomes}")
 

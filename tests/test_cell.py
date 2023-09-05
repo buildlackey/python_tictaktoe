@@ -21,4 +21,5 @@ def test_adjoining_cells(configure_logging):
     assert cell.get_adjoining_cells() == [[(2, 0), (2, 1), (2, 2)], [(0, 2), (1, 2), (2, 2)], [(2, 2), (1, 1), (0, 0)]]
 
     cell = Model.Cell('X', 1, 1, 3)
-    assert cell.get_adjoining_cells() == [[(1, 0), (1, 1), (1, 2)], [(0, 1), (1, 1), (2, 1)]]
+    assert cell.get_adjoining_cells() == [[(1, 0), (1, 1), (1, 2)], [(0, 1), (1, 1), (2, 1)], [(2, 2), (1, 1), (0, 0)]]
+
