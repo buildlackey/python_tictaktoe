@@ -3,8 +3,8 @@ import logging
 from tictaktoe import Model, View, AiBot
 
 """
-Assists controller in determining which player is next to move. We key off the answer of our
-external player to the question 'do you wish to go first' ? 
+Assists Controller in determining which player is next to move. We key off the answer of our
+external player to the question 'do you wish to go first' ?   
 """
 class NextPlayerToMove():
 
@@ -89,7 +89,7 @@ class GameSessionController:
 
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
+    logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
     GameSessionController(False).start()
 
 

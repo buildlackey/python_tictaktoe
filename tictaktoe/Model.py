@@ -15,8 +15,8 @@ class Player:
         self.gen_move_factory_func = move_factory_func
         self.is_internal_player = is_internal_player
 
-    def __str__(self):
-        return f"Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}"
+    def __repr__(self):
+        return f"[Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}]"
 
     def move(self, grid):
         cell =  self.gen_move_factory_func(self, grid)
@@ -31,8 +31,13 @@ class Cell:
         self.y = y
         self.grid_size = grid_size
 
-    def __str__(self):
+    def __repr__(self):
         return f"({self.x},{self.y})->{self.symbol}"
+
+    def with_symbol(self, new_symbol):
+        new_cell = copy.deepcopy(self)
+        new_cell.symbol = new_symbol
+        return new_cell
 
     def is_free(self):
         return self.symbol == '_'
@@ -65,12 +70,13 @@ class Cell:
     subsumes this corner cell.
     """
     def get_adjoining_cells(self):
+        if (self.grid_size == 1):       # trivial case of one cell grid
+            return [[(self.x,self.y)]]
+
         other_indices_in_col = self.__get_sibling_indices__(self.x)
         col = [(self.x,y) for y in other_indices_in_col ]
-
         other_indices_in_row = self.__get_sibling_indices__(self.y)
         row = [(x,self.y) for x in other_indices_in_row ]
-
         adjoining_cells = [col, row]
 
         if (self.x % (self.grid_size - 1) == 0 and self.y % (self.grid_size - 1) == 0):
@@ -122,6 +128,20 @@ class Grid:
                 max_width = max(max_width, cell_width)
         return max_width
 
+    def __validate_coords__(self, x, y):
+        if not (0 <= x < self.max_index) or not (0 <= y < self.max_index):
+            raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
+
+    def __repr__(self):
+        return self.render_as_string()
+
+    def __update_cell__(self, cell):
+        x = cell.x
+        y = cell.y
+        self.__validate_coords__( x, y)
+        self.grid[(x, y)] = cell
+
+
     """
     Renders the state of the game board as a printable string
     """
@@ -135,16 +155,22 @@ class Grid:
                 row_values.append(str(cell.symbol).rjust(cell_width))
             aligned_strings.append(" ".join(row_values))
         result =  "\n\n".join(aligned_strings)
-        logging.debug(f"grid render result: {result}")
+        #logging.debug(f"grid render result: {result}")
         return result
 
     def get_winner(self) -> Player:
         return self.winner
 
+    def get_free_cells(self):
+        free_cells = []
+        for y in range(self.num_rows):
+            for x in range(self.num_columns):
+                candidate = self.get_cell(x, y)
+                if (candidate.is_free()):
+                    free_cells.append(candidate)
+        logging.debug(f"Free cells: {free_cells}")
+        return free_cells
 
-    def __validate_coords__(self, x, y):
-        if not (0 <= x < self.max_index) or not (0 <= y < self.max_index):
-            raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
 
     """
     Determine if there are any remaining moves on board
@@ -153,20 +179,7 @@ class Grid:
         if (self.winner != None):
             logging.debug("Already have a winner")
             return False                # we have a winner, not accepting any more moves
-        remaining = False
-        for x in range(self.max_index):
-            for y in range(self.max_index):
-                cell = self.get_cell(x, y)
-                if cell.is_free():
-                    logging.debug(f"cell at ({x},{y}) is {cell.symbol}")
-                    remaining = True
-        return remaining
-
-    def update_cell(self, cell):
-        x = cell.x
-        y = cell.y
-        self.__validate_coords__( x, y)
-        self.grid[(x, y)] = cell
+        return self.get_free_cells()  != []
 
 
     def get_cell(self, x, y) -> Cell:
@@ -177,7 +190,7 @@ class Grid:
         self.winner = None
         for x in range(self.max_index):
             for y in range(self.max_index):
-                self.update_cell(Cell('_', x, y, self.max_index))
+                self.__update_cell__(Cell('_', x, y, self.max_index))
 
 
     """
@@ -189,7 +202,7 @@ class Grid:
         assert self.moves_left()        # shouldn't apply moves if no more available
 
         new_grid = copy.deepcopy(self)
-        new_grid.update_cell(cell)
+        new_grid.__update_cell__(cell)
 
         if (new_grid.is_winning_move(cell, player_making_this_move)):
             new_grid.winner = cell.symbol                       # Yup - it's a winning move.  mark it !
