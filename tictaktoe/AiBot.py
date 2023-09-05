@@ -22,13 +22,32 @@ class AiNextMoveFactory:
     def __init__(self):
         pass
 
-    def set_players(self, first_player_to_move, second_player):
+    def set_players(self, first_player_to_move, second_player): # TODO: better consistency if done in in constructor
         self.players = [ first_player_to_move, second_player ]
+
+    """
+    Get the index of the player whose turn it is to move (so we can flip between players as their turn comes up)
+    """
+    def __get_index_of_player(self, player_who_most_move: Model.Player):
+        if (player_who_most_move.symbol == self.players[0].symbol):
+            return 0
+        else:
+            return 1
+
+    def __flatten_list__(self, nested_list):
+        result = []
+        for item in nested_list:
+            if isinstance(item, list):
+                result.extend(self.__flatten_list__(item))
+            else:
+                result.append(item)
+        return result
+
 
     """
     Score a game play outcome as reflected in 'grid'.  If 'player' has the winning moves:1, else if opponent won: -1 
     """
-    def score(self, grid: Model.Grid, desired_winner: Model.Player) -> int:
+    def __score__(self, grid: Model.Grid, desired_winner: Model.Player):
         if (grid.get_winner() == desired_winner.symbol):    # positive score for this move series if won by 'desired'
             return 1
         elif (grid.get_winner() != None):       # if winner is the other player, then negative score
@@ -36,12 +55,23 @@ class AiNextMoveFactory:
         elif (not grid.moves_left()):
             return None
 
+    def __highest_scoring_outcome__(self, outcomes: List[ScoredGameScenario]) -> ScoredGameScenario:
+        best_score_so_far = -999999
+        best_candidate = None
+
+        for candidate in outcomes:
+            if (candidate.score > best_score_so_far):
+                best_candidate = candidate
+                best_score_so_far = candidate.score
+
+        return best_candidate
+
     def all_game_outcomes(self,
                           g: Model.Grid,
                           desired_winner: Model.Player,
                           which_player_index: int,
                           moves_so_far) -> List[ScoredGameScenario]:
-        score = self.score(g, desired_winner)
+        score = self.__score__(g, desired_winner)
         logging.debug(f"all_move_sequences. next_mover: {which_player_index}. moves_so_far:{moves_so_far}. score: {score}")
         if (score):
             logging.info(f"got scoreable grid with these moves: {moves_so_far}. grid: {g}")
@@ -58,40 +88,19 @@ class AiNextMoveFactory:
                 result = self.all_game_outcomes(updated_grid, desired_winner, 1 - which_player_index, updated_moves)
                 results.append(result)
                 logging.debug(f"unflattened results for cell {results}")
-            flattened_result = self.flatten_list(results)
+            flattened_result = self.__flatten_list__(results)
             return flattened_result
+    def get_move(self, grid: Model.Grid, player_who_must_move: Model.Player) -> List[int]:
+        index_of_player_with_current_turn  = self.__get_index_of_player(player_who_must_move)
+        all_game_outcomes = self.all_game_outcomes(grid, player_who_must_move, index_of_player_with_current_turn, [])
 
-    def highest_scoring_sequence_of_moves(self, grid: Model.Grid, player: Model.Player):
-        def select_best_score(self, candidates):
-            winner = None
-            for candidate in candidates:
-                if (candidate.score):
-                    #best_so_far =
-                    winner = candidate
-
-
-
-        candidates = self.all_game_outcomes(grid, player, [])
-        best = select_best_score(candidates)
+        best = self.__highest_scoring_outcome__(all_game_outcomes)
+        logging.debug(f"best score identified: {best}")
+        last_move_cell = best.list_of_moves[0]
+        return [ last_move_cell.x,last_move_cell.y ]
 
 
-
-    def get_move(self, grid: Model.Grid, player: Model.Player):
-        all_game_outcomes = self.all_game_outcomes(grid, player, [])
-        for resultant_grid in all_game_outcomes:
-            print(f"grid: {resultant_grid}")
-
-
-    def flatten_list(self, nested_list):
-        result = []
-        for item in nested_list:
-            if isinstance(item, list):
-                result.extend(self.flatten_list(item))
-            else:
-                result.append(item)
-        return result
-
-if __name__ == "__main__":
+if __name__ == "__main__":      ## TODO - don't need .. delete
     logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
     player1 = Model.Player("one", True, 'x', None, True)
     player2 = Model.Player("two", False, 'o', None, False)

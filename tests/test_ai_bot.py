@@ -27,3 +27,18 @@ def test_on_2by2_grid(configure_logging):
     assert all(outcome.grid.winner == player1.symbol for outcome in game_outcomes)
 
 
+def test_can_get_best_and_only_move_from_1by1_grid(configure_logging):
+
+    next_move_factory = AiBot.AiNextMoveFactory()
+
+    def next_move_from_ai_bot(player: Model.Player, grid: Model.Grid):  # next move factory using machine intelligence
+        return next_move_factory.get_move(grid, player)
+
+    player1 = Model.Player("one", True, 'x', next_move_from_ai_bot, True)
+    player2 = Model.Player("two", False, 'o', next_move_from_ai_bot, False)
+    grid = Model.Grid(1)
+
+    next_move_factory.set_players(player1, player2)
+
+    selected_move = player1.move(grid)
+    print(f"selected_move {selected_move}")

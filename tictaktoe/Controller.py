@@ -87,7 +87,7 @@ class GameSessionController:
                 self.ui.display_game_grid(self.grid)
                 player = self.whose_turn.get()
                 cell = player.move(self.grid)
-                self.ui.announce_internal_player_move(player, cell, self.human_mode)
+                self.ui.announce_internal_player_move(player, cell, self.human_mode)  # shows move the AI chose
                 self.grid = self.grid.apply_move(cell, player)  # get new grid copy updated with this move
 
                 if not self.grid.moves_left():

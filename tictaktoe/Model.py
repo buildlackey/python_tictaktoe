@@ -12,14 +12,14 @@ class Player:
         self.name = name
         self.goes_first = goes_first
         self.symbol = str(symbol).lower()
-        self.gen_move_factory_func = move_factory_func
+        self.move_factory_func = move_factory_func
         self.is_internal_player = is_internal_player
 
     def __repr__(self):
         return f"[Player: {self.name}. Goes first?: {self.goes_first}. Symbol: {self.symbol}]"
 
     def move(self, grid):
-        cell =  self.gen_move_factory_func(self, grid)
+        cell =  self.move_factory_func(self, grid)
         logging.debug(f"move selected by {self}. cell: {cell}")
         return cell
 
