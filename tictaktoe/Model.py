@@ -2,6 +2,10 @@ import logging
 import copy
 from typing import List
 
+free_cell_symbol = '_'
+x_symbol = 'x'
+y_symbol = 'y'
+
 class Cell:
     def __init__(self, symbol, x, y, grid_size):
         self.symbol = symbol
@@ -18,7 +22,7 @@ class Cell:
         return new_cell
 
     def is_free(self):
-        return self.symbol == '_'
+        return self.symbol == free_cell_symbol
 
     """
     Given a horizontal or vertical index position, return all the other indices in the row or column
@@ -70,7 +74,7 @@ class Cell:
 
 
 def cell_factory(x, y, max_index):
-    return Cell('_', x, y, max_index)
+    return Cell(free_cell_symbol, x, y, max_index)
 
 
 """
@@ -197,7 +201,7 @@ class Grid:
         self.winner = None
         for x in range(self.max_index):
             for y in range(self.max_index):
-                self.update_cell(Cell('_', x, y, self.max_index))
+                self.update_cell(Cell(free_cell_symbol, x, y, self.max_index))
 
 
     """
