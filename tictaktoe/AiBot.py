@@ -67,18 +67,6 @@ class AiNextMoveFactory:
         return best_candidate
 
 
-    #TODO -remove this. not needed
-    """
-    Select random cell from remaining free positions on board. This method should only be called if no winning 
-    combination of moves can be discovered, and when the board remains unfilled.
-    """
-    def __get_random_cell(self, grid: Model.Grid):
-        return grid.get_free_cells()[0]
-
-
-
-        return best_candidate
-
     def all_game_outcomes(self,
                           grid: Model.Grid,
                           desired_winner: Model.Player,
@@ -111,6 +99,12 @@ class AiNextMoveFactory:
             logging.debug(f"applying heuristic of grabbing as cell as close to center as possible on free board")
             return center_cell
 
+        cell_for_defensive_move = self.__get_blocking_move__(player_who_must_move, grid)
+        if (cell_for_defensive_move):
+            logging.debug(f"returning cell for blocking move: {cell_for_defensive_move}")
+            return cell_for_defensive_move
+
+
         index_of_player_with_current_turn  = self.__get_index_of_player(player_who_must_move)
         all_game_outcomes = self.all_game_outcomes(grid, player_who_must_move, index_of_player_with_current_turn, [])
 
@@ -121,6 +115,24 @@ class AiNextMoveFactory:
         else:
             logging.debug(f"best score identified: {best}")
             return best.list_of_moves[0]
+
+    def __get_blocking_move__(self, curr_player: Model.Player, grid: Model.Grid) -> Model.Cell | None:
+
+        def blocking_cell(intersection):  # if opponent is 'one move away' from a win return blocking cell to stop it
+            blocking_cell = None
+            return blocking_cell
+
+        for x in range(grid.max_index):
+            for y in range(grid.max_index):
+                cell = grid.get_cell(x, y)
+                intersections = cell.get_intersections()  # (x,y)'s for rows, cols, and maybe diagonals crossing cell
+                for i in intersections:
+                    blocker = blocking_cell(i)
+                    if (blocker):
+                        logging.debug(f"returning blocking cell {blocker} to prevent win on {i}")
+                        return blocker
+
+        return None
 
 
 if __name__ == "__main__":      ## TODO - don't need .. delete

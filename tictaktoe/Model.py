@@ -1,13 +1,29 @@
 import logging
 import copy
-from typing import List
+from typing import List, Tuple
 
 free_cell_symbol = '_'
 x_symbol = 'x'
 o_symbol = 'o'
 
+class Intersection:
+    def __init__(self, coords: List[Tuple[int,int]]):
+        self.coords = sorted(coords)
+        self.otherCoords = [(2,2)]
+
+    def __repr__(self):
+        return f"Intersection: {self.coords}"
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Intersection):
+            return self.coords == other.coords
+        return False
+
+
+
 class Cell:
-    def __init__(self, symbol, x, y, grid_size):
+    def __init__(self, symbol, x: int, y: int, grid_size):
         self.symbol = symbol
         self.x = x
         self.y = y
@@ -45,21 +61,31 @@ class Cell:
         return retval
 
     """
-    Given a 'non corner' cell, this method returns two sequences of adjacent cells, one sequence for the 
-    row that subsumes this cell, and another for the subsuming column.   If this is a 'corner cell' (e.g., 
-    the cell at (0,0) could be considered to occupy the upper left 'corner' of the grid)  then 
-    this method's return value will additionally include the sequence of cells that comprise the diagonal that
-    subsumes this corner cell.
+    Given a 'non corner' cell, this method returns two Intersections (sequences of adjacent cell coordinates), one 
+    sequence for the row that subsumes this cell, and another for the subsuming column.   If this is a 'corner cell' 
+    (e.g., the cell at (0,0) could be considered to occupy the upper left 'corner' of the grid)  then 
+    this method's return value will additionally include the sequence of cell coords that comprise the diagonal that
+    subsumes this corner cell.   
     """
-    def get_adjoining_cells(self):
+    def get_intersections(self) -> List[Intersection]:
+
+        mm = Mouse([(222,1)])
+
         if (self.grid_size == 1):       # trivial case of one cell grid
-            return [[(self.x,self.y)]]
+            return [(Intersection([(self.x, self.y)]))]
 
         other_indices_in_col = self.__get_sibling_indices__(self.x)
         col = [(self.x,y) for y in other_indices_in_col ]
         other_indices_in_row = self.__get_sibling_indices__(self.y)
         row = [(x,self.y) for x in other_indices_in_row ]
-        adjoining_cells = [col, row]
+
+        i1 = Intersection(col)
+        i2 = Intersection(row)
+
+        logging.debug(f"i1 {i1}")
+        logging.debug(f"i2 {i2}")
+
+        adjoining_cells = [i1, i2]
 
 
         is_edge_cell =  (self.x % (self.grid_size - 1) == 0 and self.y % (self.grid_size - 1) == 0)
@@ -67,7 +93,7 @@ class Cell:
 
         if (is_edge_cell or is_corner_cell):
             logging.debug(f"Cell {self} identified as corner cell")
-            adjoining_cells.append(self.__get_adjacent_cells_in_diagonal())
+            adjoining_cells.append( Intersection(self.__get_adjacent_cells_in_diagonal()))
 
         return adjoining_cells
 
@@ -241,13 +267,14 @@ class Grid:
             logging.debug(f"result of fetch via coords {x_y_coords}: {cell}")
             return cell.symbol == player_making_this_move.symbol
 
-        def all_cells_owned_by_curr_player(cell_coordinates_sequence):
-            result =  all(is_cell_owned_by_curr_player(cell) for cell in cell_coordinates_sequence)
-            logging.debug(f"processing intersection: {cell_coordinates_sequence} yields: {result}")
+        def all_cells_owned_by_curr_player(intersection):
+            coords = intersection.coords
+            result =  all(is_cell_owned_by_curr_player(cell) for cell in coords)
+            logging.debug(f"processing intersection: {intersection} yields: {result}")
             return result
 
-        intersections = cell.get_adjoining_cells()  # rows, columns, and maybe diagonals that intersect cell
+        intersections = cell.get_intersections()  # rows, columns, and maybe diagonals that intersect cell
         logging.debug(f"intersections: {intersections}")
-        any_intersection_owned = any(all_cells_owned_by_curr_player(cell_coord_seq) for cell_coord_seq in intersections)
+        any_intersection_owned = any(all_cells_owned_by_curr_player(intersection) for intersection in intersections)
         logging.debug(f"for cell {cell} any_intersection_owned == {any_intersection_owned}")
         return any_intersection_owned

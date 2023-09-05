@@ -13,16 +13,31 @@ def configure_logging():
     # Clean up logging configuration after the test (if needed)
 
 
-def test_adjoining_cells(configure_logging):
+def test_intersections(configure_logging):
     cell = Model.Cell('X', 0, 0, 3)
-    assert cell.get_adjoining_cells() == [[(0, 0), (0, 1), (0, 2)], [(0, 0), (1, 0), (2, 0)], [(0, 0), (1, 1), (2, 2)]]
+    intersections = cell.get_intersections()
+    assert intersections == \
+           [
+               Model.Intersection([(0, 1), (0, 0), (0, 2)]),  # verifies order doesn't matter for Intersection c-tor
+               Model.Intersection([(0, 0), (1, 0), (2, 0)]),
+               Model.Intersection([(0, 0), (1, 1), (2, 2)])
+           ]
 
     cell = Model.Cell('X', 2, 2, 3)
-    assert cell.get_adjoining_cells() == [[(2, 0), (2, 1), (2, 2)], [(0, 2), (1, 2), (2, 2)], [(2, 2), (1, 1), (0, 0)]]
+    assert cell.get_intersections() == \
+           [
+               Model.Intersection([(2, 0), (2, 1), (2, 2)]),
+               Model.Intersection([(0, 2), (1, 2), (2, 2)]),
+               Model.Intersection([(2, 2), (1, 1), (0, 0)])
+           ]
 
     cell = Model.Cell('X', 1, 1, 3)
-    assert cell.get_adjoining_cells() == [[(1, 0), (1, 1), (1, 2)], [(0, 1), (1, 1), (2, 1)], [(2, 2), (1, 1), (0, 0)]]
-
+    assert cell.get_intersections() == \
+           [
+               Model.Intersection([(1, 0), (1, 1), (1, 2)]),
+               Model.Intersection([(0, 1), (1, 1), (2, 1)]),
+               Model.Intersection([(2, 2), (1, 1), (0, 0)])
+           ]
 
 
 def test_empty_grid(configure_logging):
