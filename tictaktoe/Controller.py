@@ -15,7 +15,7 @@ class NextPlayerToMove():
         else:
             self.players = [player2, player1]
 
-    def __str__(self):
+    def __repr__(self):
         return f"player1: {self.players[0]}. player2: {self.players[1]}. count: {self.moveCount}"
 
 
@@ -27,13 +27,17 @@ class NextPlayerToMove():
         return nextPlayer
 
 """
-Sets up the grid, prompts the external player for their name, prefered game symbol ('x' or 'o'), 
+Sets up the grid, prompts the external player for their name, preferred game symbol ('x' or 'o'), 
 and whether or not to go first.   For each game round the controller will loop through process of getting players 
 moves until a winning move or draw (no more positions open on board) is detected.  Upon conclusion of each game
 the external player has the option of continuing for another round of play.
 """
 class GameSessionController:
-    def __init_player_state(self, ui: View.UI, use_human_input_for_all_players, ai_next_move_factory):
+    def __init_player_state(self,
+                            ui: View.UI,
+                            use_human_input_for_all_players,
+                            ai_next_move_factory: AiBot.AiNextMoveFactory):
+
         def next_move_from_ui_input(player: Model.Player, grid: Model.Grid): # factory for getting next move from human
             return ui.prompt_for_coords_of_next_move(grid, player)
 
@@ -44,14 +48,19 @@ class GameSessionController:
 
         # set up state that drives behavior of internal player
         if self.external_player.symbol == 'X':
-            symbol = 'O'        # internal player symbol is 'o'
+            symbol_internal = 'O'        # internal player symbol is 'o'
         else:
-            symbol = 'X'        # internal player symbol is 'x'
+            symbol_internal = 'X'        # internal player symbol is 'x'
         goes_first =  not self.external_player.goes_first
         if (use_human_input_for_all_players):
-            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ui_input, True)
+            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol_internal, next_move_from_ui_input, True)
         else:
-            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol, next_move_from_ai_bot, True)
+            self.internal_player = Model.Player("SomeCheapAI", goes_first, symbol_internal, next_move_from_ai_bot, True)
+
+        if (self.internal_player.goes_first):
+            ai_next_move_factory.set_players(self.internal_player, self.external_player)
+        else:
+            ai_next_move_factory.set_players(self.external_player, self.internal_player)
 
         self.whose_turn = NextPlayerToMove(self.internal_player, self.external_player)
 

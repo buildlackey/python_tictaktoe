@@ -133,7 +133,7 @@ class Grid:
             raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
 
     def __repr__(self):
-        return self.render_as_string()
+        return f"winner: {self.winner}. cells: {self.render_as_string()}"
 
     def __update_cell__(self, cell):
         x = cell.x
