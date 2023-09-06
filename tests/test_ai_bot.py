@@ -72,26 +72,6 @@ def test_3by3_get_all_expected_outcomes(configure_logging):
     print(f"game_outcomes: {game_outcomes}")
 
 
-def test_know_when_to_block_diag(configure_logging): # recognize need to apply blocking move if about to lose (diagonal)
-    player1 = Model.Player("one", True, 'x', None, True)
-    player2 = Model.Player("two", False, 'o', None, False)
-    grid = Model.Grid(3)
-
-    next_move_factory = AiBot.AiNextMoveFactory()
-    next_move_factory.set_players(player1, player2)
-
-    # player 1 will win on diagonal in next move
-    grid.update_cell(Model.Cell('x',2,1,3))
-    grid.update_cell(Model.Cell('o',2,0,3))
-    grid.update_cell(Model.Cell('o',0,1,3))
-
-    print("THE GRID")
-    print(grid.render_as_string())
-    print("THE GRID")
-
-
-
-
 
 def test_can_get_best_and_only_move_from_1by1_grid(configure_logging):
 

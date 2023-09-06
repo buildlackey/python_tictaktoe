@@ -15,11 +15,37 @@ class Intersection:
         return f"Intersection: {self.coords}"
 
     def __eq__(self, other):
-        """Overrides the default implementation"""
         if isinstance(other, Intersection):
             return self.coords == other.coords
         return False
 
+    """
+    If Intersection contains one free cell, and all the other cells are owned by opposing player, returns the 
+    free cell as the 'blocker' which -- if used in the next move, will prevent the opposing player from owning
+    all the cells in the Intersection (thus preventing opponent from winning the game, at least via this Intersection).
+    """
+    def cell_to_block_opponent_win(self, opposing_player: 'Player', grid: 'Grid'):
+        logging.debug(f"cell_to_block_opponent_win: {self}")
+
+        free_cell = None
+        num_owned_by_opponent = 0     # count of cells owned by opposing_player
+        for coord_tuple in self.coords:
+            logging.debug(f"checking coords: {coord_tuple}")
+            cell = grid.get_cell(coord_tuple[0],coord_tuple[1])
+            if (cell.is_free()):
+                logging.debug(f"cell is free: {cell}")
+                free_cell = cell
+            elif (cell.symbol == opposing_player.symbol):
+                logging.debug(f"cell is owned by opponent: {cell}")
+                num_owned_by_opponent += 1
+            else:
+                assert cell.symbol == opposing_player.get_opponent_symbol()     # we should never get here
+
+        logging.debug(f"num_owned_by_opponent: {num_owned_by_opponent}")
+        if (free_cell and num_owned_by_opponent == grid.max_index - 1):  # if all but one owned by opponent
+            return free_cell                                             # return the free_cell if it was found
+        else:
+            return None
 
 
 class Cell:
@@ -60,43 +86,43 @@ class Cell:
         logging.debug(f"__get_adjacent_cells_in_diagonal cell: {self}: {retval}")
         return retval
 
+
+    def __max_index__(self):
+        return self.grid_size - 1
+
+    def right_to_left_diagonal(self) -> List[Tuple[int,int]]:
+        return [(self.__max_index__() - i, i) for i in range(self.grid_size)]
+
+    def left_to_right_diagonal(self) -> List[Tuple[int,int]]:
+        return  [(i,i) for i in range(self.grid_size)]
+
     """
-    Given a 'non corner' cell, this method returns two Intersections (sequences of adjacent cell coordinates), one 
-    sequence for the row that subsumes this cell, and another for the subsuming column.   If this is a 'corner cell' 
-    (e.g., the cell at (0,0) could be considered to occupy the upper left 'corner' of the grid)  then 
-    this method's return value will additionally include the sequence of cell coords that comprise the diagonal that
-    subsumes this corner cell.   
+    Given a cell that is not on a corner, and not along a diagonal in the grid,  this method returns two 
+    Intersections (sequences of adjacent cell coordinates), one sequence for the row that subsumes this cell, 
+    and another for the subsuming column.   
+
+    If this cell is on a diagonal, then we return the upper-left to lower-right diagonal, plus the 'flipped' diagonal
+    (which consists of the line running from upper right to lower left).
     """
     def get_intersections(self) -> List[Intersection]:
-
-        mm = Mouse([(222,1)])
-
         if (self.grid_size == 1):       # trivial case of one cell grid
             return [(Intersection([(self.x, self.y)]))]
 
-        other_indices_in_col = self.__get_sibling_indices__(self.x)
-        col = [(self.x,y) for y in other_indices_in_col ]
-        other_indices_in_row = self.__get_sibling_indices__(self.y)
-        row = [(x,self.y) for x in other_indices_in_row ]
+        indices_in_col = self.__get_sibling_indices__(self.x)
+        col = [(self.x,y) for y in indices_in_col ]
+        indices_in_row = self.__get_sibling_indices__(self.y)
+        row = [(x,self.y) for x in indices_in_row ]
 
-        i1 = Intersection(col)
-        i2 = Intersection(row)
+        intersections = [(Intersection(col)), (Intersection(row))]
 
-        logging.debug(f"i1 {i1}")
-        logging.debug(f"i2 {i2}")
+        if (self.x == self.y):
+            logging.debug(f"cell {self} is on left to right (and down) diagonal")
+            intersections.append(Intersection(self.left_to_right_diagonal()))
+        if (self.__max_index__() - self.x == self.y):
+            logging.debug(f"cell {self} is on right to left (and down) diagonal")
+            intersections.append(Intersection(self.right_to_left_diagonal()))
 
-        adjoining_cells = [i1, i2]
-
-
-        is_edge_cell =  (self.x % (self.grid_size - 1) == 0 and self.y % (self.grid_size - 1) == 0)
-        is_corner_cell = (self.x == self.y)
-
-        if (is_edge_cell or is_corner_cell):
-            logging.debug(f"Cell {self} identified as corner cell")
-            adjoining_cells.append( Intersection(self.__get_adjacent_cells_in_diagonal()))
-
-        return adjoining_cells
-
+        return intersections
 
 
 def cell_factory(x, y, max_index):
