@@ -86,7 +86,7 @@ class UI:
             if match:
                 x = int(match.group(1))
                 y = int(match.group(2))
-                if (x >= 0 and x < grid.max_index and y >= 0 and y < grid.max_index):
+                if (x >= 0 and x < grid.dimension and y >= 0 and y < grid.dimension):
                     if grid.get_cell(x, y).is_free():
                         return [x, y]
             return None
@@ -97,12 +97,12 @@ class UI:
 
         assert grid.moves_left()
 
-        msg = f"\nYour move, {player.name},  Enter x,y coordinates of free cell (each coord > 0 and < {grid.max_index}): "
+        msg = f"\nYour move, {player.name},  Enter x,y coordinates of free cell (each coord > 0 and < {grid.dimension}): "
         input = self.get_user_input(msg, get_coords)
         coords = parse_input(input)
         logging.debug(f"for next move position, human player {player} selected coords: {coords}")
 
-        cell = Model.Cell(player.symbol, coords[0], coords[1], grid.max_index)
+        cell = Model.Cell(player.symbol, coords[0], coords[1], grid.dimension)
         return cell
 
     def announce_internal_player_move(self, player, cell, human_mode):

@@ -103,8 +103,8 @@ class AiNextMoveFactory:
 
     def get_move(self, grid: Model.Grid, player_who_must_move: Model.Player) -> Model.Cell:
         if (grid.is_board_empty()):  # heuristic: reduce search space, grab center (or close as possible on diagonal)
-            center_index = int(grid.max_index/2)  # if grid w/ even number max dimension, this is close enough to center
-            center_cell =  Model.Cell(player_who_must_move.symbol, center_index, center_index, grid.max_index)
+            center_index = int(grid.dimension / 2)  # if grid w/ even number max dimension, this is close enough to center
+            center_cell =  Model.Cell(player_who_must_move.symbol, center_index, center_index, grid.dimension)
             logging.debug(f"applying heuristic of grabbing as cell as close to center as possible on free board")
             return center_cell
 
@@ -126,8 +126,8 @@ class AiNextMoveFactory:
             return best.list_of_moves[0]
 
     def __get_blocking_move__(self, curr_player: Model.Player, grid: Model.Grid) -> Model.Cell | None:      # TODO: should be a method on Grid
-        for x in range(grid.max_index):
-            for y in range(grid.max_index):
+        for x in range(grid.dimension):
+            for y in range(grid.dimension):
                 cell = grid.get_cell(x, y)
                 intersections = cell.get_intersections()  # (x,y)'s for rows, cols, and maybe diagonals crossing cell
                 for i in intersections:

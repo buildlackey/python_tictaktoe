@@ -64,7 +64,7 @@ class GameSessionController:
     def __init__(self, human_mode=False):
         self.ui = View.UI()
         self.grid = self.ui.game_grid_from_user_input()
-        self.grid_dimension = self.grid.max_index
+        self.grid_dimension = self.grid.dimension
         self.human_mode = human_mode
         self.__init_player_state(self.ui, human_mode, AiBot.AiNextMoveFactory())
 

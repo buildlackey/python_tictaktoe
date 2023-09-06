@@ -43,7 +43,7 @@ class Intersection:
                 assert cell.symbol == opposing_player.get_opponent_symbol()     # we should never get here
 
         logging.debug(f"num_owned_by_opponent: {num_owned_by_opponent}")
-        if (free_cell and num_owned_by_opponent == grid.max_index - 1):  # if all but one owned by opponent
+        if (free_cell and num_owned_by_opponent == grid.dimension - 1):  # if all but one owned by opponent
             return free_cell.with_symbol(opposing_player.get_opponent_symbol())  # return the free_cell if it was found
         else:
             return None
@@ -91,10 +91,10 @@ class Cell:
     def __max_index__(self):
         return self.grid_size - 1
 
-    def right_to_left_diagonal(self) -> List[Tuple[int,int]]:
+    def __right_to_left_diagonal__(self) -> List[Tuple[int,int]]:
         return [(self.__max_index__() - i, i) for i in range(self.grid_size)]
 
-    def left_to_right_diagonal(self) -> List[Tuple[int,int]]:
+    def __left_to_right_diagonal__(self) -> List[Tuple[int,int]]:
         return  [(i,i) for i in range(self.grid_size)]
 
     """
@@ -118,10 +118,10 @@ class Cell:
 
         if (self.x == self.y):
             logging.debug(f"cell {self} is on left to right (and down) diagonal")
-            intersections.append(Intersection(self.left_to_right_diagonal()))
+            intersections.append(Intersection(self.__left_to_right_diagonal__()))
         if (self.__max_index__() - self.x == self.y):
             logging.debug(f"cell {self} is on right to left (and down) diagonal")
-            intersections.append(Intersection(self.right_to_left_diagonal()))
+            intersections.append(Intersection(self.__right_to_left_diagonal__()))
 
         return intersections
 
@@ -178,26 +178,26 @@ Example:
 """
 class Grid:
 
-    def __init__(self, max_index, object_factory=cell_factory):
-        self.num_rows = max_index
-        self.num_columns = max_index            # TODO - num_rows/cols not needed
-        self.max_index = max_index
+    def __init__(self, dimension, object_factory=cell_factory):
+        self.num_rows = dimension
+        self.num_columns = dimension            # TODO - num_rows/cols not needed
+        self.dimension = dimension
         self.object_factory = object_factory
-        self.grid = {(x, y): self.object_factory(x,y,self.max_index) for y in range(max_index) for x in range(max_index)}
+        self.grid = {(x, y): self.object_factory(x, y, self.dimension) for y in range(dimension) for x in range(dimension)}
         self.winner = None
 
 
     def __calculate_max_printable_cell_width__(self) -> int:
         max_width = 0
-        for y in range(self.num_rows):
-            for x in range(self.num_columns):
+        for y in range(self.dimension):
+            for x in range(self.dimension):
                 value = self.get_cell(x, y).symbol
                 cell_width = len(str(value))
                 max_width = max(max_width, cell_width)
         return max_width
 
     def __validate_coords__(self, x, y):
-        if not (0 <= x < self.max_index) or not (0 <= y < self.max_index):
+        if not (0 <= x < self.dimension) or not (0 <= y < self.dimension):
             raise ValueError(f"Coordinates are out of bounds: ({x},{y})")
 
     def __repr__(self):
@@ -216,9 +216,9 @@ class Grid:
     def render_as_string(self) -> str:
         cell_width = self.__calculate_max_printable_cell_width__()
         aligned_strings = []
-        for y in range(self.num_rows):
+        for y in range(self.dimension):
             row_values = []
-            for x in range(self.num_columns):
+            for x in range(self.dimension):
                 cell = self.get_cell(x, y)
                 row_values.append(str(cell.symbol).rjust(cell_width))
             aligned_strings.append(" ".join(row_values))
@@ -231,13 +231,17 @@ class Grid:
 
     def get_free_cells(self) -> List[Cell]:
         free_cells = []
-        for y in range(self.num_rows):
-            for x in range(self.num_columns):
+        for y in range(self.dimension):
+            for x in range(self.dimension):
                 candidate = self.get_cell(x, y)
                 if (candidate.is_free()):
                     free_cells.append(candidate)
         logging.debug(f"Free cells: {free_cells}")
         return free_cells
+
+    def get_best_free_cell(self):         # favor center first, then edges, otherwise, just the first free cell available
+        center_cell = self.get_cell(self.dimension)
+
 
 
     """
@@ -251,7 +255,7 @@ class Grid:
 
 
     def is_board_empty(self) -> bool:
-        return (len(self.get_free_cells()) == self.max_index*self.max_index)
+        return (len(self.get_free_cells()) == self.dimension * self.dimension)
 
     def get_cell(self, x, y) -> Cell:
         self.__validate_coords__( x, y)
@@ -259,9 +263,9 @@ class Grid:
 
     def clear(self):
         self.winner = None
-        for x in range(self.max_index):
-            for y in range(self.max_index):
-                self.update_cell(Cell(free_cell_symbol, x, y, self.max_index))
+        for x in range(self.dimension):
+            for y in range(self.dimension):
+                self.update_cell(Cell(free_cell_symbol, x, y, self.dimension))
 
 
     """
