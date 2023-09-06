@@ -99,6 +99,28 @@ def test_know_when_to_block_diag2(configure_logging): # recognize need to apply 
 
 
 
+def test_best_free_cell(configure_logging): # recognize need to apply blocking move if about to lose (diagonal)
+    grid = Model.Grid(3)
+
+    cell = grid.get_best_free_cell()
+    assert(cell.x == 1 and cell.y == 1)
+
+    grid.update_cell(Model.Cell('o', 1, 1, 3))
+    cell = grid.get_best_free_cell()
+    assert(cell.x == 0 and cell.y == 0)
+
+    # should get last free cells
+    grid.update_cell(Model.Cell('o', 0, 0, 3))
+    grid.update_cell(Model.Cell('o', 2, 2, 3))
+    grid.update_cell(Model.Cell('o', 2, 0, 3))
+    cell = grid.get_best_free_cell()
+    assert(cell.x == 0 and cell.y == 2)
+
+    # claim that last cell and now should have no best free celll
+    grid.update_cell(Model.Cell('o', 0, 2, 3))
+    assert(not grid.get_best_free_cell())
+
+
 def test_empty_grid(configure_logging):
     grid = Model.Grid(3)
 

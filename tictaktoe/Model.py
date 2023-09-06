@@ -91,6 +91,13 @@ class Cell:
     def __max_index__(self):
         return self.grid_size - 1
 
+    def is_center_cell(self):
+        mid_index = int(self.__max_index__())
+        return self.x == mid_index and self.y == mid_index
+
+    def is_edge_cell(self):
+        return self.x == 0 or self.y == 0 or self.x == self.__max_index__() or self.y == self.__max_index__()
+
     def __right_to_left_diagonal__(self) -> List[Tuple[int,int]]:
         return [(self.__max_index__() - i, i) for i in range(self.grid_size)]
 
@@ -203,6 +210,9 @@ class Grid:
     def __repr__(self):
         return f"winner: {self.winner}. cells: {self.render_as_string()}"
 
+    def __max_index__(self):
+        return self.dimension - 1
+
     def update_cell(self, cell):
         x = cell.x
         y = cell.y
@@ -239,10 +249,31 @@ class Grid:
         logging.debug(f"Free cells: {free_cells}")
         return free_cells
 
-    def get_best_free_cell(self):         # favor center first, then edges, otherwise, just the first free cell available
-        center_cell = self.get_cell(self.dimension)
-
-
+    def get_best_free_cell(self) -> Cell | None:    # might not need this -- part of scoring
+        if (self.moves_left()):
+            mid_index = int(self.dimension / 2)
+            center_cell = self.get_cell(mid_index, mid_index)
+            if (center_cell.is_free()):
+                logging.debug("best free is center")
+                return center_cell
+            upper_left =  self.get_cell(0, 0)
+            if (upper_left.is_free()):
+                logging.debug("best free is upper_left")
+                return upper_left
+            upper_right =  self.get_cell(self.__max_index__(), 0)
+            if (upper_right.is_free()):
+                logging.debug("best free is upper_left")
+                return upper_right
+            lower_left =  self.get_cell(0, self.__max_index__())
+            if (lower_left.is_free()):
+                logging.debug("best free is lower_right")
+                return lower_left
+            lower_right =  self.get_cell(self.__max_index__(), self.__max_index__())
+            if (lower_right.is_free()):
+                logging.debug("best free is lower_right")
+                return lower_right
+        else:
+            return None
 
     """
     Determine if there are any remaining moves on board

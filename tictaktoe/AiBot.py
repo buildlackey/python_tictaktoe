@@ -5,8 +5,21 @@ from typing import List
 
 
 class ScoredGameScenario:
-    def __init__(self, score, grid, list_of_moves):
+    def __init__(self, score: int, grid: Model.Grid, list_of_moves: List[Model.Cell]):
+
         self.score = score
+
+        # override self score if good move
+        if (score == 1):   # winning series
+            if (list_of_moves):
+                first_move = list_of_moves[0]
+                logging.debug(f"list_of_moves - first move:{first_move}")
+                if first_move.is_center_cell():
+                    logging.debug(f"override score for center cell: {first_move}")
+                    self.score = 100
+                elif (first_move.is_edge_cell()):
+                    logging.debug(f"override score for edge cell: {first_move}")
+                    self.score = 10
         self.grid = grid
         self.list_of_moves = list_of_moves
 
@@ -80,7 +93,7 @@ class AiNextMoveFactory:
                           grid: Model.Grid,
                           desired_winner: Model.Player,
                           which_player_index: int,
-                          moves_so_far) -> List[ScoredGameScenario]:
+                          moves_so_far: List[Model.Cell]) -> List[ScoredGameScenario]:
         score = self.__score__(grid, desired_winner)
         logging.debug(f"all_game_outcomes. next_mover: {which_player_index}. moves_so_far:{moves_so_far}. score: {score}")
         if (score or not grid.moves_left()):
