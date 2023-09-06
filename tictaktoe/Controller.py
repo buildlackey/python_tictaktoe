@@ -95,7 +95,7 @@ class GameSessionController:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
+    #logging.basicConfig(level=logging.DEBUG)  # Set the desired log level
     GameSessionController(False).start()
 
 

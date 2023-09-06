@@ -125,18 +125,13 @@ class AiNextMoveFactory:
             logging.debug(f"best score identified: {best}")
             return best.list_of_moves[0]
 
-    def __get_blocking_move__(self, curr_player: Model.Player, grid: Model.Grid) -> Model.Cell | None:
-
-        def blocking_cell(intersection):  # if opponent is 'one move away' from a win return blocking cell to stop it
-            blocking_cell = None
-            return blocking_cell
-
+    def __get_blocking_move__(self, curr_player: Model.Player, grid: Model.Grid) -> Model.Cell | None:      # TODO: should be a method on Grid
         for x in range(grid.max_index):
             for y in range(grid.max_index):
                 cell = grid.get_cell(x, y)
                 intersections = cell.get_intersections()  # (x,y)'s for rows, cols, and maybe diagonals crossing cell
                 for i in intersections:
-                    blocker = blocking_cell(i)
+                    blocker = i.cell_to_block_opponent_win(self.__get_opposing_player__(curr_player), grid)
                     if (blocker):
                         logging.debug(f"returning blocking cell {blocker} to prevent win on {i}")
                         return blocker

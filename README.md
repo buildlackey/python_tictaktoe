@@ -8,6 +8,15 @@ This repository holds code for a single player tic tak toe game where you
 play against a primitive AI Bot that uses brute force search to determine its moves.
 
 
+## Caveats
+
+Pure brute force approach leads to 9! combinations of moves being score if the AI player goes first, 
+so to speed things up we use some heurestics.  For example, if the AI player goes first we grab the middle 
+cell without any scoring or searching.  BUT, if the human opponent player goes first the AI move generator 
+is still slow. So please give it about a minute for that second move.
+
+
+
 ## Running
 
 

@@ -44,7 +44,7 @@ class Intersection:
 
         logging.debug(f"num_owned_by_opponent: {num_owned_by_opponent}")
         if (free_cell and num_owned_by_opponent == grid.max_index - 1):  # if all but one owned by opponent
-            return free_cell                                             # return the free_cell if it was found
+            return free_cell.with_symbol(opposing_player.get_opponent_symbol())  # return the free_cell if it was found
         else:
             return None
 
