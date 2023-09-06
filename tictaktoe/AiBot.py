@@ -25,6 +25,15 @@ class AiNextMoveFactory:
     def set_players(self, first_player_to_move, second_player): # TODO: better consistency if done in in constructor
         self.players = [ first_player_to_move, second_player ]
 
+    def __get_opposing_player__(self, player: Model.Player):
+        if (player == self.players[0]):
+            return self.players[1]
+        elif (player == self.players[1]):
+            return self.players[0]
+        else:
+            raise ValueError(f"Invalid player: {player}")
+
+
     """
     Get the index of the player whose turn it is to move (so we can flip between players as their turn comes up)
     """

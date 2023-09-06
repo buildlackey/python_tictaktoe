@@ -39,6 +39,9 @@ any non-integer characters, as shown below:
 
 ## Testing 
 
-To run unit tests, execute this command from the top level project folder:
-    
+To run unit tests, execute these commands from the top level project folder:
+
+   python3.11 -m venv game
+   . game/bin/activate
+   pip install pytest
     python -m pytest
