@@ -16,11 +16,23 @@ cell without any scoring or searching.  BUT, if the human opponent player goes f
 is still slow. So please give it about a minute for that second move.
 
 
+## Installation
+
+Before running, install the zip file as shown below:
+
+    # download the zip file to some directory: /tmp/zip.tar.gz
+    # make a workspace folder and cd to it
+    rm -rf /tmp/junk
+    mkdir /tmp/junk
+    cd  /tmp/junk
+    tar xvzf /tmp/zip.tar.gz
+
 
 ## Running
 
 
-You can run the program from the top level project folder as shown below. 
+After following the steps in the preceding section you 
+can run the program from the top level project folder as shown below. 
 By specifying optional arguments you can run with  verbose logging 
 (using the '-v' / --verbose flag), and/or with -m/--manual mode which 
 turns off the AIBot's automated move discovery, instead allowing you 
@@ -48,7 +60,7 @@ any non-integer characters, as shown below:
 
 ## Testing 
 
-To run unit tests, execute these commands from the top level project folder:
+To run unit tests, execute these command from the top level project folder:
 
    python3.11 -m venv game
    . game/bin/activate
