@@ -65,3 +65,41 @@ def test_can_get_best_and_only_move_from_1by1_grid(configure_logging):
     next_move_factory.set_players(player1, player2)
     selected_move = player1.move(grid)
     assert(selected_move.symbol == 'x' and selected_move.x == 0 and selected_move.y == 0)
+
+def test_bot_grabs_winning_move(configure_logging):
+    next_move_factory = AiBot.AiNextMoveFactory()
+
+    def next_move_from_ai_bot(player: Model.Player, grid: Model.Grid):  # next move factory using machine intelligence
+        return next_move_factory.get_move(grid, player)
+
+
+    player1 = Model.Player("one", True, 'o', None, True)
+    player2 = Model.Player("two", False, 'x', next_move_from_ai_bot, False)
+    grid = Model.Grid(3)
+
+    next_move_factory.set_players(player1, player2)
+
+
+    grid.update_cell(Model.Cell('o',0,0,3))
+    grid.update_cell(Model.Cell('o',2,0,3))
+    grid.update_cell(Model.Cell('o',1,1,3))
+    grid.update_cell(Model.Cell('o',2,1,3))
+
+
+    grid.update_cell(Model.Cell('x',0,1,3))
+    grid.update_cell(Model.Cell('x',0,2,3))
+    grid.update_cell(Model.Cell('x',2,2,3))
+
+
+    print("THE GRID")
+    print(grid.render_as_string())
+    print("THE GRID")
+
+    winning_cell_for_x = next_move_factory.get_move( grid, player2)
+    print(f"winning_cell_for_x: {winning_cell_for_x}")
+
+    assert(winning_cell_for_x.symbol == 'x' and winning_cell_for_x.x == 1 and winning_cell_for_x.y == 2)
+
+
+
+

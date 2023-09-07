@@ -249,32 +249,6 @@ class Grid:
         logging.debug(f"Free cells: {free_cells}")
         return free_cells
 
-    def get_best_free_cell(self) -> Cell | None:    # might not need this -- part of scoring
-        if (self.moves_left()):
-            mid_index = int(self.dimension / 2)
-            center_cell = self.get_cell(mid_index, mid_index)
-            if (center_cell.is_free()):
-                logging.debug("best free is center")
-                return center_cell
-            upper_left =  self.get_cell(0, 0)
-            if (upper_left.is_free()):
-                logging.debug("best free is upper_left")
-                return upper_left
-            upper_right =  self.get_cell(self.__max_index__(), 0)
-            if (upper_right.is_free()):
-                logging.debug("best free is upper_left")
-                return upper_right
-            lower_left =  self.get_cell(0, self.__max_index__())
-            if (lower_left.is_free()):
-                logging.debug("best free is lower_right")
-                return lower_left
-            lower_right =  self.get_cell(self.__max_index__(), self.__max_index__())
-            if (lower_right.is_free()):
-                logging.debug("best free is lower_right")
-                return lower_right
-        else:
-            return None
-
     """
     Determine if there are any remaining moves on board
     """

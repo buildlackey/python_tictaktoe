@@ -121,7 +121,13 @@ class AiNextMoveFactory:
             logging.debug(f"applying heuristic of grabbing as cell as close to center as possible on free board")
             return center_cell
 
-        cell_for_defensive_move = self.__get_blocking_move__(player_who_must_move, grid)
+        my_opponent =  self.__get_opposing_player__(player_who_must_move)           # First go for the win!
+        my_victory_cell = self.__get_blocking_move__(my_opponent , grid)
+        if(my_victory_cell):
+            logging.debug(f"cell for blocking move (symbol yet to be set to current player ): {my_victory_cell}")
+            return my_victory_cell.with_symbol(player_who_must_move.symbol)
+
+        cell_for_defensive_move = self.__get_blocking_move__(player_who_must_move, grid) # Next, block any opponent win!
         if (cell_for_defensive_move):
             logging.debug(f"returning cell for blocking move: {cell_for_defensive_move}")
             return cell_for_defensive_move
@@ -138,13 +144,19 @@ class AiNextMoveFactory:
             logging.debug(f"best score identified: {best}")
             return best.list_of_moves[0]
 
-    def __get_blocking_move__(self, curr_player: Model.Player, grid: Model.Grid) -> Model.Cell | None:      # TODO: should be a method on Grid
+    """
+    From the perspective of a player on defense (who is next up to move) we sweep through all cells of the grid, 
+    asking the question: will the opposing player(on offense) win if they select this (free) cell. If the answer is
+    'yes', then we return that cell as the next cell to claim as the defensive player.
+    """
+    def __get_blocking_move__(self, player_on_defense: Model.Player, grid: Model.Grid) -> Model.Cell | None:      # TODO: should be a method on Grid
+        player_on_offense = self.__get_opposing_player__(player_on_defense)
         for x in range(grid.dimension):
             for y in range(grid.dimension):
                 cell = grid.get_cell(x, y)
                 intersections = cell.get_intersections()  # (x,y)'s for rows, cols, and maybe diagonals crossing cell
                 for i in intersections:
-                    blocker = i.cell_to_block_opponent_win(self.__get_opposing_player__(curr_player), grid)
+                    blocker = i.cell_to_block_opponent_win(player_on_offense, grid)
                     if (blocker):
                         logging.debug(f"returning blocking cell {blocker} to prevent win on {i}")
                         return blocker
