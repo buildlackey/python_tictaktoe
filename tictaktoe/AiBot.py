@@ -149,7 +149,7 @@ class AiNextMoveFactory:
     asking the question: will the opposing player(on offense) win if they select this (free) cell. If the answer is
     'yes', then we return that cell as the next cell to claim as the defensive player.
     """
-    def __get_blocking_move__(self, player_on_defense: Model.Player, grid: Model.Grid) -> Model.Cell | None:      # TODO: should be a method on Grid
+    def __get_blocking_move__(self, player_on_defense: Model.Player, grid: Model.Grid):      # TODO: should be a method on Grid
         player_on_offense = self.__get_opposing_player__(player_on_defense)
         for x in range(grid.dimension):
             for y in range(grid.dimension):
