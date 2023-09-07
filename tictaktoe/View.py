@@ -11,8 +11,7 @@ game (announcing winning plays, draws, etc).
 class UI:
     def announce_winner(self, grid):
         winner = grid.get_winner()
-        printable_winner = f"{winner}"
-        if winner and printable_winner != "None":        # strange bug that requires me to check for 2nd condition
+        if winner:        # strange bug that requires me to check for 2nd condition
             print(f"\nGame has been won by player who wisely chose '{grid.winner}'. Congratulations!\n")
         else:
             print(f"\nGame resulted in a draw\n")
